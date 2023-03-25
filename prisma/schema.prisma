@@ -6,12 +6,14 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = "postgresql://postgres:jajaja123@localhost:5432/legally?schema=public"
+  provider          = "postgresql"
+  url               = "postgres://obqnrvfvzutyct:d36f6fa9d92f95dd9fec3c9cfaba6e5838f6054e5e74fd97523739affaf2bd7c@ec2-44-206-204-65.compute-1.amazonaws.com:5432/df5h6npmmu2p2j?schema=public"
+  shadowDatabaseUrl = "postgresql://postgres:jajaja123@localhost:5432/legally?schema=public"
 }
 
 model user {
   id    String @id @default(cuid())
   name  String
   email String @unique
+  phone String
 }
