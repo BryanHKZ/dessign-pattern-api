@@ -1,12 +1,12 @@
 const prisma = require("../../tools/prisma");
 
-const getusersAdmin = async (req, res) => {
+const getusersClient = async (req, res) => {
   try {
     const { status, page = 1, limit = 10 } = req.query;
 
     const offset = (page - 1) * limit;
 
-    const Users = await prisma.userAdmi.findMany({
+    const Users = await prisma.user.findMany({
       skip: offset,
       take: limit,
       where: {
@@ -14,7 +14,7 @@ const getusersAdmin = async (req, res) => {
       },
     });
 
-    const totalUsers = await prisma.userAdmi.count();
+    const totalUsers = await prisma.user.count();
 
     return res
       .status(200)
@@ -27,5 +27,5 @@ const getusersAdmin = async (req, res) => {
 };
 
 module.exports = {
-  getusersAdmin,
+  getusersClient,
 };

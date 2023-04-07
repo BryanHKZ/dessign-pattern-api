@@ -3,7 +3,17 @@ const { hash } = require("bcryptjs");
 
 const CreateUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { nickName, email, password } = req.body;
+
+    console.log(nickName);
+
+    const validations = await getUsersValidatations(nickName, email);
+
+    if (validations > 0) {
+      return res.status(403).json({
+        msg: `El correo ${email} o el nombre de usuario ${nickName} ya existe`,
+      });
+    }
 
     const passwords = await hash(password, 10);
 
@@ -11,8 +21,6 @@ const CreateUser = async (req, res) => {
       ...req.body,
       password: passwords,
     };
-
-    console.log(variable);
 
     const user = await prisma.userAdmi.create({
       data: variable,
@@ -30,4 +38,22 @@ const CreateUser = async (req, res) => {
 
 module.exports = {
   CreateUser,
+};
+
+const getUsersValidatations = async (nickName, email) => {
+  const emails = await prisma.userAdmi.findMany({
+    where: {
+      OR: [
+        {
+          nickName: nickName,
+        },
+        {
+          email: email,
+        },
+      ],
+    },
+  });
+
+  if (emails) return emails.length;
+  else 0;
 };
