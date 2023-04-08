@@ -12,23 +12,24 @@ datasource db {
 }
 
 model user {
-  id             String @id @default(cuid())
-  name           String?
-  lastName       String?
-  password       String?
-  email          String? @unique
-  phone          String?
-  identification String?  @unique
-  direction      String?
-  city           String?
-  departament    String?
-  country        String?
+  id                String          @id @default(cuid())
+  name              String?
+  lastName          String?
+  password          String?
+  email             String?         @unique
+  phone             String?
+  identification    String?         @unique
+  direction         String?
+  city              String?
+  departament       String?
+  country           String?
   imgIdentification String?
   imgdriverlicense  String?
-  status            Boolean   @default(value: true)
-  created_at        DateTime  @default(now())
-  updated_at        DateTime? @updatedAt
+  status            Boolean         @default(value: true)
+  created_at        DateTime        @default(now())
+  updated_at        DateTime?       @updatedAt
   deleted_at        DateTime?
+  trafficTicket     trafficTicket[]
 }
 
 model userAdmi {
@@ -43,4 +44,88 @@ model userAdmi {
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
   deleted_at DateTime?
+}
+
+model domains {
+  id         String    @id @default(cuid())
+  module     String
+  data       String
+  color      String?
+  value      String?
+  created_at DateTime  @default(now())
+  updated_at DateTime? @updatedAt
+  deleted_at DateTime?
+}
+
+model services {
+  id                 String               @id @default(cuid())
+  module             String
+  price              String?
+  image              String?
+  color              String
+  microServices      microServices[]
+  priceMicroServices priceMicroServices[]
+  created_at         DateTime             @default(now())
+  updated_at         DateTime?            @updatedAt
+  deleted_at         DateTime?
+}
+
+model microServices {
+  id                 String               @id @default(cuid())
+  id_services        String
+  name               String
+  services           services             @relation(fields: [id_services], references: [id])
+  priceMicroServices priceMicroServices[]
+  created_at         DateTime             @default(now())
+  updated_at         DateTime?            @updatedAt
+  deleted_at         DateTime?
+}
+
+model priceMicroServices {
+  id               String          @id @default(cuid())
+  id_services      String
+  name             String
+  services         services        @relation(fields: [id_services], references: [id])
+  id_microServices String
+  microServices    microServices   @relation(fields: [id_microServices], references: [id])
+  created_at       DateTime        @default(now())
+  updated_at       DateTime?       @updatedAt
+  deleted_at       DateTime?
+  trafficTicket    trafficTicket[]
+}
+
+model trafficTicket {
+  id                        String             @id @default(cuid())
+  email                     String
+  name                      String
+  lastName                  String
+  phone                     String
+  imgIdentification         String?
+  imgdriverlicense          String?
+  infraction                String
+  idUser                    String
+  nameUser                  String
+  lastNameUser              String
+  user                      user               @relation(fields: [idUser], references: [id])
+  city                      String
+  vehiclePlate              String
+  leasing                   Boolean
+  vehicleClass              Boolean
+  dayCarTicket              String
+  enforcedCollection        String
+  notificationInfraction    Boolean
+  Soat                      Boolean
+  mechanicalTechnicalReview Boolean
+  idpriceMicroServices      String
+  priceMicroServices        priceMicroServices @relation(fields: [idpriceMicroServices], references: [id])
+  state                     String             @default(value: "pendiente")
+  caseNumber                String             @default(value: "pendiente")
+  infractionNumber          String
+  colorState                String             @default(value: "#E96D0F")
+  documentationRequired     Json?
+  documentRequired          Boolean            @default(value: false)
+  applyRefund               Boolean
+  created_at                DateTime           @default(now())
+  updated_at                DateTime?          @updatedAt
+  deleted_at                DateTime?
 }
