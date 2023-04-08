@@ -14,7 +14,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 dotenv.config();
 
-// Configurar la conexión a la base de datos PostgreSQL con Prisma
 const prisma = new PrismaClient();
 
 registerRoutes(app);

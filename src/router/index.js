@@ -1,9 +1,7 @@
-const user = require("./user/user");
-const userclient = require("./userClient/userClient")
+const ticket = require("./ticket/ticket");
 
-const registerRoutes  = (app) => {
-  app.use("/api", user);
-  app.use("/api", userclient);
+const registerRoutes = (app) => {
+  app.use(process.env.API_DEFAULT_ROUTE, ticket);
 };
 
 module.exports = registerRoutes;
