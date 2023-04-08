@@ -11,20 +11,22 @@ datasource db {
 }
 
 model ticket {
-  id         String    @id @map("_id")
-  status     String    @default(value: "open")
-  idUser     String
-  idAgent    String
-  messages   message[]
-  created_at DateTime  @default(now())
-  updated_at DateTime? @updatedAt
-  deleted_at DateTime?
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  status      String    @default(value: "open")
+  title       String
+  description String?
+  idUser      String
+  messages    message[]
+  created_at  DateTime  @default(now())
+  updated_at  DateTime? @updatedAt
+  deleted_at  DateTime?
 }
 
 model message {
-  id       String  @id @map("_id")
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
   readed   Boolean @default(value: false)
+  idAgent  String
   content  String
   ticket   ticket? @relation(fields: [ticketId], references: [id])
-  ticketId String?
+  ticketId String? @db.ObjectId
 }

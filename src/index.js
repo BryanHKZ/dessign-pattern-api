@@ -3,7 +3,6 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
 const express = require("express");
-const { PrismaClient } = require("@prisma/client");
 
 const app = express();
 const port = 3000;
@@ -13,8 +12,6 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 dotenv.config();
-
-const prisma = new PrismaClient();
 
 registerRoutes(app);
 

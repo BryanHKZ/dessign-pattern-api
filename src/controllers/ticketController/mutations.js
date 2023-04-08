@@ -1,18 +1,69 @@
 const prisma = require("../../tools/prisma");
-const { hash } = require("bcryptjs");
+const { findError } = require("../../utils/errors");
+const { ulid } = require("ulid");
+
+const createTicket = async (req, res) => {
+  try {
+    const { title, description, idUser, idAgent } = req.body;
+
+    const hasOpenTicket = await prisma.ticket.findFirst({
+      where: {
+        idUser,
+        status: "open",
+      },
+    });
+
+    if (hasOpenTicket) return res.status(400).json(findError("LGL4002"));
+
+    const ticket = await prisma.ticket.create({
+      data: {
+        title,
+        description,
+        idUser,
+        idAgent,
+        id: ulid(),
+      },
+    });
+
+    res.status(200).json(ticket);
+  } catch (error) {
+    res.status(500).json(findError("LGL5001"));
+  }
+};
 
 const updateTicketStatus = async (req, res) => {
   try {
-    const { idTicket } = req.query;
+    const { id } = req.params;
     const { status } = req.body;
 
-    console.log(idTicket, status);
+    if (!["open", "close"].includes(status))
+      return res.status(400).json(findError("LGL4003"));
+
+    const Ticket = await prisma.ticket.findUnique({
+      where: {
+        id: id,
+      },
+    });
+
+    if (!Ticket) return res.status(404).json(findError("LGL4001"));
+
+    const updateTicket = await prisma.ticket.update({
+      where: {
+        id,
+      },
+      data: {
+        status,
+      },
+    });
+
+    return res.status(204).json();
   } catch (error) {
     console.log(error);
-    return res.status(500).send("Hubo un error en el servidor");
+    return res.status(500).json(findError("LGL5001"));
   }
 };
 
 module.exports = {
   updateTicketStatus,
+  createTicket,
 };
