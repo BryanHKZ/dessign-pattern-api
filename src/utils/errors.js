@@ -19,6 +19,27 @@ const errors = [
     code: "LGL4003",
     message: "El estado del ticket no es válido",
   },
+  {
+    code: "LGL3001",
+    message: "El id del ticket es requerido",
+  },
+  {
+    code: "LGL3002",
+    message: "El mensaje requiere el id del agente.",
+  },
+  {
+    code: "LGL3003",
+    message: "",
+  },
+  {
+    code: "LGL3004",
+    message:
+      "Debes esperar la respuesta de un agente antes de poder a volver enviar un mensaje",
+  },
+  {
+    code: "LGL3005",
+    message: "El mensaje requiere un contenido",
+  },
 ];
 
 /**
@@ -28,17 +49,7 @@ const errors = [
  * @returns Object | null
  */
 const findError = (code = "") => {
-  let error = errors.find((e) => e.code === code);
-
-  if (error) {
-    error = { ...error };
-
-    delete error.httpStatus;
-
-    return error;
-  }
-
-  return null;
+  return errors.find((e) => e.code === code);
 };
 
 module.exports = {

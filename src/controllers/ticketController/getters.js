@@ -33,7 +33,6 @@ const getAllTickets = async (req, res) => {
       page = 1,
       limit = 10,
       idUser,
-      idAgent,
       fields = "",
       order_field = "created_at",
       order_direction = "desc",
@@ -48,9 +47,6 @@ const getAllTickets = async (req, res) => {
     if (idUser) {
       where.idUser = idUser;
     }
-    if (idAgent) {
-      where.idAgent = idAgent;
-    }
 
     const Tickets = await prisma.ticket.findMany({
       skip: offset,
@@ -58,6 +54,9 @@ const getAllTickets = async (req, res) => {
       where,
       orderBy: {
         [order_field]: order_direction,
+      },
+      include: {
+        messages: fields.includes("messages"),
       },
     });
 
@@ -77,6 +76,7 @@ const getAllTickets = async (req, res) => {
 
     res.status(200).json(responseObject);
   } catch (error) {
+    console.log(error);
     res.status(500).json(findError("LGL5001"));
   }
 };

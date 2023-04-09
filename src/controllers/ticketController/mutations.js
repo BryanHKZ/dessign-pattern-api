@@ -1,10 +1,9 @@
 const prisma = require("../../tools/prisma");
 const { findError } = require("../../utils/errors");
-const { ulid } = require("ulid");
 
 const createTicket = async (req, res) => {
   try {
-    const { title, description, idUser, idAgent } = req.body;
+    const { title, description, idUser } = req.body;
 
     const hasOpenTicket = await prisma.ticket.findFirst({
       where: {
@@ -20,8 +19,6 @@ const createTicket = async (req, res) => {
         title,
         description,
         idUser,
-        idAgent,
-        id: ulid(),
       },
     });
 
