@@ -14,7 +14,7 @@ const {
 const auth = require("../../middleware/auth");
 const { isApiHealthy } = require("../../controllers");
 
-api.get("/health", auth, isApiHealthy);
+api.get("/health", isApiHealthy);
 
 api.get("/tickets/id/:id", auth, getTicketById);
 api.get("/tickets", auth, getAllTickets);
