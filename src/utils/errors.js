@@ -1,43 +1,43 @@
 /**
- * El código debe tener el prefijo "LGL"
+ * El código debe tener el prefijo "CSIFY"
  */
 const errors = [
   {
-    code: "LGL5001",
+    code: "CSIFY5001",
     message: "Ha ocurrido un error en el servidor",
   },
   {
-    code: "LGL4001",
+    code: "CSIFY4001",
     message: "Ticket no encontrado",
   },
   {
-    code: "LGL4002",
+    code: "CSIFY4002",
     message:
       "El usuario ya tiene un ticket activo, por tanto no puede abrir otro.",
   },
   {
-    code: "LGL4003",
+    code: "CSIFY4003",
     message: "El estado del ticket no es válido",
   },
   {
-    code: "LGL3001",
+    code: "CSIFY3001",
     message: "El id del ticket es requerido",
   },
   {
-    code: "LGL3002",
+    code: "CSIFY3002",
     message: "El mensaje requiere el id del agente.",
   },
   {
-    code: "LGL3003",
+    code: "CSIFY3003",
     message: "",
   },
   {
-    code: "LGL3004",
+    code: "CSIFY3004",
     message:
       "Debes esperar la respuesta de un agente antes de poder a volver enviar un mensaje",
   },
   {
-    code: "LGL3005",
+    code: "CSIFY3005",
     message: "El mensaje requiere un contenido",
   },
 ];
@@ -45,7 +45,7 @@ const errors = [
 /**
  * Método para retornar un Objeto de Error por defecto
  *
- * @param {String} code Debe tener un prefijo "LGL" acompañado de un número
+ * @param {String} code Debe tener un prefijo "CSIFY" acompañado de un número
  * @returns Object | null
  */
 const findError = (code = "") => {

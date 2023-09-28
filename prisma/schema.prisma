@@ -6,41 +6,24 @@ generator client {
 }
 
 datasource db {
-  provider = "mongodb"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
-model ticket {
-  id          String    @id @default(auto()) @map("_id") @db.ObjectId
-  status      Status    @default(open)
-  title       String
-  description String?
-  idUser      String
-  messages    message[]
-  created_at  DateTime  @default(now())
-  updated_at  DateTime? @updatedAt
-  deleted_at  DateTime?
-}
-
-model message {
-  id         String    @id @default(auto()) @map("_id") @db.ObjectId
-  readed     Boolean   @default(value: false)
-  idAgent    String?
-  content    String    @db.String
-  sender     Sender
-  ticket     ticket?   @relation(fields: [ticketId], references: [id])
-  ticketId   String    @db.ObjectId
+model User {
+  id         String    @id @default(cuid())
+  status     String    @default("open")
+  firstName  String
+  lastName   String?
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
   deleted_at DateTime?
 }
 
-enum Sender {
-  AGENT
-  USER
-}
-
-enum Status {
-  open
-  close
+model Calification {
+  id      String @id @default(cuid())
+  fromId  String
+  toId    String
+  value   Float
+  message String
 }
