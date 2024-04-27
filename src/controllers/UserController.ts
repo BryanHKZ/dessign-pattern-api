@@ -4,6 +4,6 @@ export default class UserController {
   getAllUsers() {
     const userMapper = new UserMapper();
 
-    return userMapper.findUserById();
+    return userMapper.findAllUsers();
   }
 }
