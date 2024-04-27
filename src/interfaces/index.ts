@@ -7,5 +7,5 @@ export interface IUser {
 }
 
 export interface AuthenticationStrategy {
-    authenticate(username: string, password: string): boolean;
+    authenticate(email: string, password: string): boolean;
 }

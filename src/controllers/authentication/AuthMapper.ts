@@ -1,6 +1,6 @@
 import { AuthenticationStrategy } from "../../interfaces";
 import DBConnection from "../../tools/DBConnection";
-import UsernameAndPasswordAuthentication from "./methods/Auth";
+import LoginAuthentication from "./methods/Auth";
 
 export default class AuthMapper extends DBConnection {
     private authenticationStrategy: AuthenticationStrategy;
@@ -10,7 +10,7 @@ export default class AuthMapper extends DBConnection {
         this.authenticationStrategy = strategy;
     }
 
-    login(username: string, password: string): boolean {
-        return this.authenticationStrategy.authenticate(username, password);
+    login(email: string, password: string): boolean {
+        return this.authenticationStrategy.authenticate(email, password);
     }
 }

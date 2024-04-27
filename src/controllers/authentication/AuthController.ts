@@ -1,6 +1,6 @@
 import { Request } from "express";
 import AuthMapper from "./AuthMapper";
-import UsernameAndPasswordAuthentication from "./methods/Auth";
+import LoginAuthentication from "./methods/Auth";
 import OAuthAuthentication from "./methods/OAuth";
 
 export default class AuthController {
@@ -16,7 +16,7 @@ export default class AuthController {
 
     loginByEmailAndPassword(req: Request) {
         const { email, password } = req.body
-        const mapper = new AuthMapper(new UsernameAndPasswordAuthentication())
+        const mapper = new AuthMapper(new LoginAuthentication())
 
         mapper.login(email, password)
     }

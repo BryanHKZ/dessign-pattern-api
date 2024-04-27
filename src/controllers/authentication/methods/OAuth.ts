@@ -1,8 +1,8 @@
 import { AuthenticationStrategy } from "../../../interfaces";
 
 export default class OAuthAuthentication implements AuthenticationStrategy {
-    authenticate(username: string, password: string): boolean {
-        // Your OAuth authentication logic here
+    authenticate(email: string, password: string): boolean {
+        console.log("login by oauth")
         return true; // Placeholder for actual logic
     }
 }
