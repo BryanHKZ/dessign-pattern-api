@@ -1,5 +1,11 @@
 export interface IUser {
-    name: string
     id: number
-    lastName: string
+    status: boolean
+    firstName: string
+    lastName?: string
+    email: string
+}
+
+export interface AuthenticationStrategy {
+    authenticate(username: string, password: string): boolean;
 }
