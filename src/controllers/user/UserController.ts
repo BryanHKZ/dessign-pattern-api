@@ -1,4 +1,4 @@
-import UserMapper from "./mappers/UserMapper";
+import UserMapper from "./UserMapper";
 
 export default class UserController {
   getAllUsers() {

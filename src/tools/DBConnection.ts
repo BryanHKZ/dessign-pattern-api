@@ -1,4 +1,4 @@
-class DBConnection {
+export default class DBConnection {
     database?: string
 
     constructor() {
