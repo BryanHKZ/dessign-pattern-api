@@ -19,8 +19,6 @@ export default class AuthController {
 
   loginByEmailAndPassword = (req: Request, res: Response) => {
     try {
-      console.log("🚀 ~ AuthController ~ loginByOAuth ~ req:", req);
-
       const { email, password } = req.body;
       const mapper = new AuthMapper(new LoginAuthentication());
 

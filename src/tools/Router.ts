@@ -1,5 +1,5 @@
 import express, { NextFunction, Request, Response, Router } from "express";
-import auth from "../middleware/auth";
+import auth from "../decorators/auth";
 
 class RouterHandler {
   private router: Router;

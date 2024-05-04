@@ -13,7 +13,6 @@ export default class UserController {
 
       res.status(200).json(users);
     } catch (error) {
-      console.log("🚀 ~ UserController ~ getAllUsers ~ error:", error);
       res.status(500).json({ error: error.message });
     }
   };
