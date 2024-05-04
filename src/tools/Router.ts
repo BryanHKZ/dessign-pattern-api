@@ -1,4 +1,5 @@
 import express, { NextFunction, Request, Response, Router } from "express";
+import auth from "../middleware/auth";
 
 class RouterHandler {
   private router: Router;
@@ -15,28 +16,28 @@ class RouterHandler {
     path: string,
     handler: (req: Request, res: Response, next: NextFunction) => void
   ): void {
-    this.router.get(path, handler);
+    this.router.get(path, auth, handler);
   }
 
   public post(
     path: string,
     handler: (req: Request, res: Response, next: NextFunction) => void
   ): void {
-    this.router.post(path, handler);
+    this.router.post(path, auth, handler);
   }
 
   public put(
     path: string,
     handler: (req: Request, res: Response, next: NextFunction) => void
   ): void {
-    this.router.put(path, handler);
+    this.router.put(path, auth, handler);
   }
 
   public delete(
     path: string,
     handler: (req: Request, res: Response, next: NextFunction) => void
   ): void {
-    this.router.delete(path, handler);
+    this.router.delete(path, auth, handler);
   }
 
   public getRouter(): Router {
