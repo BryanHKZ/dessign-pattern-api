@@ -3,12 +3,8 @@ export default class DBConnection {
 
   constructor() {
     if (!this.database) {
-      // Create DB Connection
-
-      // Simulate DB connection
       this.database = "MySQL3";
     }
-    // Simulate DB connection
     this.database = "MySQL3";
   }
 

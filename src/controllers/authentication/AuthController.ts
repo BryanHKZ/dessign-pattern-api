@@ -8,22 +8,28 @@ export default class AuthController {
 
   loginByOAuth = (req: Request, res: Response) => {
     try {
-      const { email, password } = req.body;
+      // const { email, password } = req.body;
       const mapper = new AuthMapper(new OAuthAuthentication());
 
-      mapper.login(email, password);
+      const responseToken = mapper.login("aaaa@gmail.com", "12345");
+
+      res.status(200).json({ token: responseToken });
     } catch (error) {
+      console.log("🚀 ~ AuthController ~ error:", error);
       res.status(500).json({ error: error.message });
     }
   };
 
   loginByEmailAndPassword = (req: Request, res: Response) => {
     try {
-      const { email, password } = req.body;
+      // const { email, password } = req.body;
       const mapper = new AuthMapper(new LoginAuthentication());
 
-      mapper.login(email, password);
+      const responseToken = mapper.login("aaaa@gmail.com", "12345");
+
+      res.status(200).json({ token: responseToken });
     } catch (error) {
+      console.log("🚀 ~ AuthController ~ error:", error);
       res.status(500).json({ error: error.message });
     }
   };
