@@ -15,7 +15,6 @@ export default class AuthController {
 
       res.status(200).json({ token: responseToken });
     } catch (error) {
-      console.log("🚀 ~ AuthController ~ error:", error);
       res.status(500).json({ error: error.message });
     }
   };
@@ -29,7 +28,6 @@ export default class AuthController {
 
       res.status(200).json({ token: responseToken });
     } catch (error) {
-      console.log("🚀 ~ AuthController ~ error:", error);
       res.status(500).json({ error: error.message });
     }
   };

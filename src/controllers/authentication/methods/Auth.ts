@@ -15,15 +15,15 @@ export default class LoginAuthentication
     return true;
   }
 
-  saveToHistory(username: string): void {
+  saveToHistory(email: string): void {
     console.log(
-      `Inicio de sesión con método Auth Simple exitoso para el usuario: ${username}`
+      `Inicio de sesión con método Auth Simple exitoso para el usuario: ${email}`
     );
   }
 
-  createToken(username: string): string {
+  createToken(email: string): string {
     console.log(
-      `Token generado con método Auth Simple para el usuario: ${username}`
+      `Token generado con método Auth Simple para el usuario: ${email}`
     );
     return "token";
   }
