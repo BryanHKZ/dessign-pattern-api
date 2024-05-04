@@ -1,11 +1,13 @@
-import { Router } from "express";
-import UserRoutes from "./user/user.routes";
-import AuthRoutes from "./user/auth.routes"
+import { Express } from "express";
+import authRoutes from "./user/auth.routes";
+import userRoutes from "./user/user.routes";
 
-const registerRoutes = () => {
-  const routes = Router();
-  routes.use("/api/v1", UserRoutes);
-  routes.use("/api/v1", AuthRoutes)
+const registerRoutes = (app: Express) => {
+  app.use("/api", userRoutes);
+  app.use("/api", authRoutes);
+  app.get("/health", (req, res) => {
+    res.send("Health check OK!");
+  });
 };
 
 export default registerRoutes;

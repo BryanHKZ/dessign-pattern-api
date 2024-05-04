@@ -4,20 +4,19 @@ import LoginAuthentication from "./methods/Auth";
 import OAuthAuthentication from "./methods/OAuth";
 
 export default class AuthController {
-    constructor() {
-    }
+  constructor() {}
 
-    loginByOAuth(req: Request) {
-        const { email, password } = req.body
-        const mapper = new AuthMapper(new OAuthAuthentication())
+  loginByOAuth(req: Request) {
+    const { email, password } = req.body;
+    const mapper = new AuthMapper(new OAuthAuthentication());
 
-        mapper.login(email, password)
-    }
+    mapper.login(email, password);
+  }
 
-    loginByEmailAndPassword(req: Request) {
-        const { email, password } = req.body
-        const mapper = new AuthMapper(new LoginAuthentication())
+  loginByEmailAndPassword(req: Request) {
+    const { email, password } = req.body;
+    const mapper = new AuthMapper(new LoginAuthentication());
 
-        mapper.login(email, password)
-    }
+    mapper.login(email, password);
+  }
 }

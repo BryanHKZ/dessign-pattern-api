@@ -1,11 +1,10 @@
-import { Router } from "express";
 import UserController from "../../controllers/user/UserController";
-import auth from "../../middleware/auth";
+import RouterHandler from "../../tools/Router";
 
-const usersRouter = Router();
+const api = new RouterHandler();
 
 const userController = new UserController();
 
-usersRouter.get("/users", auth, userController.getAllUsers);
+api.get("/v1/users", userController.getAllUsers);
 
-export default usersRouter;
+export default api.getRouter();

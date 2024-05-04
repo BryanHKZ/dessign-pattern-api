@@ -1,11 +1,11 @@
-import { Router } from "express";
 import AuthController from "../../controllers/authentication/AuthController";
-const authRoutes = Router();
+import RouterHandler from "../../tools/Router";
+
+const api = new RouterHandler();
 
 const authController = new AuthController();
 
-authRoutes.get("/login/oauth", authController.loginByOAuth);
-authRoutes.post("/login", authController.loginByEmailAndPassword)
+api.get("/v1/login/oauth", authController.loginByOAuth);
+api.post("/v1/login", authController.loginByEmailAndPassword);
 
-
-export default authRoutes;
+export default api.getRouter();

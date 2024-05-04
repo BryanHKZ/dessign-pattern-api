@@ -1,27 +1,26 @@
-import DBConnection from "../../tools/DBConnection"
-import { IUser } from "../../interfaces"
+import { IUser } from "../../interfaces";
+import DBConnection from "../../tools/DBConnection";
 
-import mockedUsers from "../../tools/mockedUsers"
+import mockedUsers from "../../tools/mockedUsers";
 
 export default class UserMapper extends DBConnection {
   constructor() {
-    super()
+    super();
   }
   findUserById(id?: number): IUser | null {
     //DO REQUEST TO DATABASE AND RETURNED DATA MUST BE MAPPED TO USER MODEL
     try {
-      const user = mockedUsers.find(e => e.id === id)
-      if (!user) return null
+      const user = mockedUsers.find((e) => e.id === id);
+      if (!user) return null;
 
-      return user
+      return user;
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
   }
 
-  findAllUsers(): IUser[] {
-    return mockedUsers
+  async findAllUsers(): Promise<IUser[]> {
+    const users = await mockedUsers;
+    return users;
   }
-
-
 }

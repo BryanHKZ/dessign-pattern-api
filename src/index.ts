@@ -1,16 +1,19 @@
 import cors from "cors";
 import dotenv from "dotenv";
 import express, { Express } from "express";
-import routes from "./router";
+import http from "http";
+import registerRoutes from "./router";
 
 dotenv.config();
 
 const app: Express = express();
-const port = 3000;
+const server = new http.Server(app);
 
-app.use(cors);
-app.use(routes);
+app.use(cors());
+registerRoutes(app);
 
-app.listen(port, () => {
-  console.log(`⚡️[server]: Server is running at http://localhost:${port}`);
+let PORT = process.env.PORT || 4000;
+
+server.listen(PORT, function () {
+  console.log(`api rest run on port ${PORT}`);
 });

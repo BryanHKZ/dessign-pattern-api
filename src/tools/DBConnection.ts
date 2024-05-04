@@ -1,24 +1,30 @@
 export default class DBConnection {
-    database?: string
+  database?: string;
 
-    constructor() {
-        // Simulate DB connection
-        this.database = "MySQL3"
-    }
+  constructor() {
+    if (!this.database) {
+      // Create DB Connection
 
-    insert(query: string) {
-        return this.database.concat(` insert: ${query}`)
+      // Simulate DB connection
+      this.database = "MySQL3";
     }
+    // Simulate DB connection
+    this.database = "MySQL3";
+  }
 
-    delete(query: string) {
-        return this.database.concat(` delete: ${query}`)
-    }
+  insert(query: string) {
+    return this.database.concat(` insert: ${query}`);
+  }
 
-    update(query: string) {
-        return this.database.concat(` update: ${query}`)
-    }
+  delete(query: string) {
+    return this.database.concat(` delete: ${query}`);
+  }
 
-    get(query: string) {
-        return this.database.concat(` get: ${query}`)
-    }
+  update(query: string) {
+    return this.database.concat(` update: ${query}`);
+  }
+
+  get(query: string) {
+    return this.database.concat(` get: ${query}`);
+  }
 }
