@@ -1,15 +1,17 @@
 import cors from "cors";
-import dotenv from "dotenv";
 import express, { Express } from "express";
 import http from "http";
 import registerRoutes from "./router";
+import { initEnvironmentVariables } from "./utils";
 
-dotenv.config();
+initEnvironmentVariables();
 
 const app: Express = express();
 const server = new http.Server(app);
 
 app.use(cors());
+app.use(express.json()); //Add it first then others follw
+app.use(express.urlencoded({ extended: true }));
 registerRoutes(app);
 
 let PORT = process.env.PORT || 3000;

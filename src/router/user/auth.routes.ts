@@ -1,4 +1,4 @@
-import AuthController from "../../controllers/authentication/AuthController";
+import AuthController from "../../application/controllers/authentication/AuthController";
 import RouterHandler from "../../tools/Router";
 
 const api = new RouterHandler();

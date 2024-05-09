@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import AuthMapper from "./AuthMapper";
+import AuthMapper from "../../mappers/AuthMapper";
 import LoginAuthentication from "./methods/Auth";
 import OAuthAuthentication from "./methods/OAuth";
 
