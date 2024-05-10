@@ -1,4 +1,5 @@
 import { IProjectCategory, ITask } from "../interfaces";
+import TaskMapper from "../mappers/TaskMapper";
 
 export default class ProjectCategoryModel {
   private id: number;
@@ -25,9 +26,10 @@ export default class ProjectCategoryModel {
 
   async getTasks(): Promise<ITask[]> {
     try {
-      return [];
+      const tasks = await new TaskMapper().getTasksByCategory(this.getId());
+      return tasks;
     } catch (error) {
-      return [];
+      console.error(error);
     }
   }
 

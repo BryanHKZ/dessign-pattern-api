@@ -1,4 +1,7 @@
-import { IProject, Status } from "../interfaces";
+import { IProjectCategory, ITask, Status } from "../interfaces";
+import ProjectMapper from "../mappers/ProjectMapper";
+import TaskMapper from "../mappers/TaskMapper";
+import UserMapper from "../mappers/UserMapper";
 import UserModel from "./User";
 
 export default class ProjectModel {
@@ -6,8 +9,8 @@ export default class ProjectModel {
   private name: string;
   private toDate: Date;
   private status: Status;
-  private createdBy: UserModel;
-  private assignedTo: UserModel;
+  private createdBy: number;
+  private assignedTo: number;
   private metadata: string;
 
   constructor(project: any) {
@@ -15,8 +18,8 @@ export default class ProjectModel {
     this.name = project.name;
     this.toDate = project.toDate;
     this.status = project.status;
-    this.createdBy = new UserModel(project.createdBy);
-    this.assignedTo = new UserModel(project.assignedTo);
+    this.createdBy = project.createdBy;
+    this.assignedTo = project.assignedTo;
     this.metadata = project.metadata;
   }
 
@@ -36,17 +39,74 @@ export default class ProjectModel {
     return this.status;
   }
 
-  getCreator(): UserModel | null {
+  getCreatorId(): number {
     return this.createdBy;
   }
 
-  getAssignedTo(): UserModel | null {
+  getAssignedToId(): number {
     return this.assignedTo;
+  }
+
+  async getCreator(): Promise<UserModel | null> {
+    const existUser = await new UserMapper().findUserById(this.createdBy);
+
+    if (!existUser) return null;
+
+    return existUser;
+  }
+
+  async getAssignedTo(): Promise<UserModel | null> {
+    const existUser = await new UserMapper().findUserById(this.createdBy);
+
+    if (!existUser) return null;
+
+    return existUser;
   }
 
   getMetadata(): any {
     if (!this.metadata) return {};
     return JSON.parse(this.metadata);
+  }
+
+  async getCategories(): Promise<IProjectCategory[]> {
+    try {
+      const categories = await new ProjectMapper().findCategoriesByProjectId(
+        this.getId()
+      );
+
+      if (!categories.length) return [];
+
+      let res = [];
+
+      for await (const category of categories) {
+        res.push(await category.toApi());
+      }
+
+      return res;
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+  }
+
+  async getTasks(): Promise<ITask[]> {
+    try {
+      const taskMapper = new TaskMapper();
+      const tasks = await taskMapper.findAllTasksByProjectId(this.getId());
+
+      if (!tasks.length) return [];
+
+      let res = [];
+
+      for await (const task of tasks) {
+        res.push(await task.toApi());
+      }
+
+      return res;
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
   }
 
   setId(id: number): void {
@@ -65,25 +125,38 @@ export default class ProjectModel {
     this.status = status;
   }
 
+  async setCreator(id: number) {
+    const existUser = await new UserMapper().findUserById(id);
+
+    if (!existUser) throw new Error("User creator not found");
+
+    this.createdBy = id;
+  }
+
+  async setAssignedTo(id: number) {
+    const existUser = await new UserMapper().findUserById(id);
+
+    if (!existUser) throw new Error("User assigned to not found");
+
+    this.assignedTo = id;
+  }
+
   setMetadataField(key: string, value: any): void {
     const metadata = this.getMetadata();
     metadata[key] = value;
     this.metadata = JSON.stringify(metadata);
   }
 
-  toApi(includePrivateFields = false): IProject {
-    const base: IProject = {
+  async toApi(): Promise<any> {
+    const base = {
       id: this.getId(),
       name: this.getName(),
       toDate: this.getDate(),
       status: this.getStatus(),
-      createdBy: this.getCreator()?.toApi(),
-      assignedTo: this.getAssignedTo()?.toApi(),
+      createdBy: (await this.getCreator()).toApi(),
+      assignedTo: (await this.getAssignedTo()).toApi(),
+      metadata: this.getMetadata(),
     };
-
-    if (includePrivateFields) {
-      base.metadata = this.getMetadata();
-    }
 
     return base;
   }

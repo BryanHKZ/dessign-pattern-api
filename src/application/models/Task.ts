@@ -1,4 +1,3 @@
-import { ITask } from "../interfaces";
 import UserMapper from "../mappers/UserMapper";
 import ProjectModel from "./Project";
 import ProjectCategoryModel from "./ProjectCategoryModel";
@@ -35,6 +34,22 @@ export default class TaskModel {
 
   getDescription(): string {
     return this.description;
+  }
+
+  getCompleted() {
+    return this.completed;
+  }
+
+  getIdUser(): number {
+    return this.idUser;
+  }
+
+  getIdCategory(): number {
+    return this.idCategory;
+  }
+
+  getIdProject(): number {
+    return this.idProject;
   }
 
   isCompleted(): boolean {
@@ -94,15 +109,15 @@ export default class TaskModel {
     this.completed = completed;
   }
 
-  setAssignedTo(idUser: number): void {
+  setIdUser(idUser: number): void {
     this.idUser = idUser;
   }
 
-  setCategory(idCategory: number): void {
+  setIdCategory(idCategory: number): void {
     this.idCategory = idCategory;
   }
 
-  setProject(idProject: number): void {
+  setIdProject(idProject: number): void {
     this.idProject = idProject;
   }
 
@@ -112,30 +127,12 @@ export default class TaskModel {
     this.metadata = JSON.stringify(metadata);
   }
 
-  async save(): Promise<boolean> {
-    try {
-      //DO REQUEST TO DATABASE TO SAVE TASK
-      return true;
-    } catch (error) {
-      return false;
-    }
-  }
-
-  async destroy(): Promise<boolean> {
-    try {
-      //DO REQUEST TO DATABASE TO DELETE TASK
-      return true;
-    } catch (error) {
-      return false;
-    }
-  }
-
-  async toApi(includePrivateFields = false): Promise<ITask> {
+  async toApi(): Promise<any> {
     const assignedTo = await this.getAssignedTo();
     const category = await this.getCategory();
     const project = await this.getProject();
 
-    const base: ITask = {
+    const base = {
       id: this.getId(),
       name: this.getName(),
       description: this.getDescription(),
@@ -143,11 +140,8 @@ export default class TaskModel {
       assignedTo: assignedTo ? assignedTo.toApi() : null,
       category: category ? await category.toApi() : null,
       project: project ? project.toApi() : null,
+      metadata: this.getMetadata(),
     };
-
-    if (includePrivateFields) {
-      base.metadata = this.getMetadata();
-    }
 
     return base;
   }

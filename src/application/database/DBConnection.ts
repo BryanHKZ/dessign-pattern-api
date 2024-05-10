@@ -16,8 +16,16 @@ export default class DBConnection {
     this.databaseStrategy.disconnect();
   }
 
-  executeQuery(query: string) {
-    return this.databaseStrategy.executeQuery(query);
+  public executeQuery(query: string, values: string[]) {
+    return this.databaseStrategy.executeQuery(query, values);
+  }
+
+  static mapFields(fields: string[], ignoreId = false) {
+    let finalFields = fields;
+    if (ignoreId) {
+      finalFields = fields.filter((field) => field !== "id");
+    }
+    return finalFields.map((field) => `${field} = ?`).join(", ");
   }
 
   static formatFields(fields: string[], ignoreId = false) {

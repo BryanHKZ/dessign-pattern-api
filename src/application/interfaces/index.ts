@@ -16,8 +16,8 @@ export interface IProject {
   name: string;
   toDate: Date;
   status: Status;
-  createdBy: IUser | null;
-  assignedTo: IUser | null;
+  createdBy: number;
+  assignedTo: number;
   metadata?: string;
 }
 
@@ -33,9 +33,9 @@ export interface ITask {
   name: string;
   description: string;
   completed: boolean;
-  assignedTo?: IUser;
-  category?: IProjectCategory;
-  project?: IProject;
+  assignedTo?: number;
+  category?: number;
+  project?: number;
   metadata?: string;
 }
 
@@ -46,5 +46,5 @@ export interface AuthenticationStrategy {
 export interface DatabaseConnection {
   connect(): void;
   disconnect(): void;
-  executeQuery(query: string): Promise<any>;
+  executeQuery(query: string, values: string[]): Promise<any>;
 }

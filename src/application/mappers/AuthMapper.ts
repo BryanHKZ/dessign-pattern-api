@@ -13,11 +13,9 @@ export default class AuthMapper extends DBConnection {
 
   async login(email: string, password: string): Promise<string> {
     try {
-      const user = await this.executeQuery(
-        `SELECT ${DBConnection.formatFields(UserMapper.fields)} FROM ${
-          this.dbName
-        } WHERE email = ${email}`
-      );
+      const userMapper = new UserMapper();
+      const user = await userMapper.findUserByEmail(email);
+
       if (!user) throw new Error("Usuario no encontrado");
 
       return "";

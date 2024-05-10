@@ -32,11 +32,14 @@ export default class MySQLConnection implements DatabaseConnection {
     }, 2000);
   }
 
-  async executeQuery(query: string) {
+  async executeQuery(query: string, values: string[]) {
     try {
       await this.connect();
 
-      const [results] = await this.connection.query(query);
+      const [results] = await this.connection.execute({
+        sql: query,
+        values,
+      });
 
       return results;
     } catch (error) {

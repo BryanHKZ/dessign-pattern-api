@@ -18,16 +18,17 @@ export default class UserMapper extends DBConnection {
     super();
   }
 
-  async findUserByEmail(email: string): Promise<IUser | null> {
+  async findUserByEmail(email: string): Promise<UserModel | null> {
     try {
       const user = await this.executeQuery(
         `SELECT ${DBConnection.formatFields(UserMapper.fields)} FROM ${
           UserMapper.dbName
-        } WHERE email = ${email}`
+        } WHERE email = ?`,
+        [email]
       );
       if (!user.length) return null;
 
-      return new UserModel(user).toApi();
+      return new UserModel(user[0]);
     } catch (error) {
       console.error(error);
     }
@@ -38,7 +39,8 @@ export default class UserMapper extends DBConnection {
       const user = await this.executeQuery(
         `SELECT ${DBConnection.formatFields(UserMapper.fields)} FROM ${
           UserMapper.dbName
-        } WHERE id = ${id}`
+        } WHERE id = ?`,
+        [id.toString()]
       );
       if (!user.length) return null;
 
@@ -52,7 +54,8 @@ export default class UserMapper extends DBConnection {
     const users = await this.executeQuery(
       `SELECT ${DBConnection.formatFields(UserMapper.fields)} FROM ${
         UserMapper.dbName
-      }`
+      }`,
+      []
     );
     return users.map((user: IUser) => new UserModel(user));
   }
@@ -117,9 +120,16 @@ export default class UserMapper extends DBConnection {
     } (${DBConnection.formatFields(
       UserMapper.fields,
       true
-    )}) VALUES ('${user.getEmail()}', '${user.getFirstName()}', '${user.getLastName()}', '${user.getStatus()}', '${user.getPassword()}', '${metadataString}')`;
+    )}) VALUES (?, ?, ?, ?, ?, ?)`;
 
-    const { insertId } = await this.executeQuery(query);
+    const { insertId } = await this.executeQuery(query, [
+      user.getEmail(),
+      user.getFirstName(),
+      user.getLastName(),
+      user.getStatus(),
+      user.getPassword(),
+      metadataString,
+    ]);
 
     user.setId(insertId);
     this.disconnect();
@@ -128,18 +138,27 @@ export default class UserMapper extends DBConnection {
   async update(user: UserModel) {
     const metadataString = JSON.stringify(user.getMetadata());
 
-    const query = `UPDATE ${
-      UserMapper.dbName
-    } SET firstName = '${user.getFirstName()}', lastName = '${user.getLastName()}', email = '${user.getEmail()}', password = '${user.getPassword()}', status = '${user.getStatus()}', metadata = '${metadataString}' WHERE id = ${user.getId()}`;
+    const query = `UPDATE ${UserMapper.dbName} SET ${DBConnection.mapFields(
+      UserMapper.fields,
+      true
+    )} WHERE id = ?`;
 
-    await this.executeQuery(query);
+    await this.executeQuery(query, [
+      user.getEmail(),
+      user.getFirstName(),
+      user.getLastName(),
+      user.getStatus(),
+      user.getPassword(),
+      metadataString,
+      user.getId().toString(),
+    ]);
     this.disconnect();
   }
 
   async delete(id: number) {
-    await this.executeQuery(
-      `DELETE FROM ${UserMapper.dbName} WHERE id = ${id}`
-    );
+    await this.executeQuery(`DELETE FROM ${UserMapper.dbName} WHERE id = ?`, [
+      id.toString(),
+    ]);
 
     this.disconnect();
   }
