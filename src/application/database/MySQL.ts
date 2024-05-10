@@ -7,10 +7,9 @@ export default class MySQLConnection implements DatabaseConnection {
 
   constructor() {
     initEnvironmentVariables();
-    this.createConnection();
   }
 
-  async createConnection() {
+  async connect() {
     try {
       this.connection = await mysql.createConnection({
         host: process.env.MYSQL_DB_HOST,
@@ -19,37 +18,29 @@ export default class MySQLConnection implements DatabaseConnection {
         password: process.env.MYSQL_DB_PASS,
         port: parseInt(process.env.MYSQL_DB_PORT),
       });
-    } catch (error) {
-      console.log(error);
-    }
-  }
 
-  async connect() {
-    await this.createConnection();
-    console.log("Connected to MySQL");
+      console.log("Connected to MySQL");
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   disconnect() {
-    if (this.connection) {
-      this.connection.end();
-    }
+    setTimeout(() => {
+      this.connection.end({ timeout: 3000 });
+      console.log("Disconnected from MySQL");
+    }, 2000);
   }
 
   async executeQuery(query: string) {
-    console.log("🚀 ~ MySQLConnection ~ executeQuery ~ query:", query);
     try {
-      const [results, fields] = await this.connection.query(query);
-      console.log(
-        "🚀 ~ MySQLConnection ~ executeQuery ~ results, fields:",
-        results,
-        fields
-      );
+      await this.connect();
+
+      const [results] = await this.connection.query(query);
 
       return results;
     } catch (error) {
-      console.log("DBQuery", error);
-    } finally {
-      this.disconnect();
+      console.log("DBQueryError", error);
     }
   }
 }

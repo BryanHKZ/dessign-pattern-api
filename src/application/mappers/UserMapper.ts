@@ -1,9 +1,9 @@
+import DBConnection from "../database/DBConnection";
 import { IUser } from "../interfaces";
 import UserModel from "../models/User";
-import DBConnection from "./IntegrationMapper";
 
 export default class UserMapper extends DBConnection {
-  private dbName = "user";
+  public static dbName = "user";
   public static fields = [
     "email",
     "firstName",
@@ -18,41 +18,45 @@ export default class UserMapper extends DBConnection {
     super();
   }
 
-  async findUserByEmail(email: string): Promise<UserModel | null> {
-    //DO REQUEST TO DATABASE AND RETURNED DATA MUST BE MAPPED TO USER MODEL
+  async findUserByEmail(email: string): Promise<IUser | null> {
     try {
       const user = await this.executeQuery(
-        `SELECT ${this.formatFields(UserMapper.fields)} FROM ${
-          this.dbName
+        `SELECT ${DBConnection.formatFields(UserMapper.fields)} FROM ${
+          UserMapper.dbName
         } WHERE email = ${email}`
       );
-      if (!user) return null;
+      if (!user.length) return null;
 
-      return new UserModel(user);
+      return new UserModel(user).toApi();
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
+
   async findUserById(id?: number): Promise<UserModel | null> {
     try {
       const user = await this.executeQuery(
-        `SELECT ${this.formatFields(UserMapper.fields)} FROM ${
-          this.dbName
+        `SELECT ${DBConnection.formatFields(UserMapper.fields)} FROM ${
+          UserMapper.dbName
         } WHERE id = ${id}`
       );
-      if (!user) return null;
+      if (!user.length) return null;
 
-      return user;
+      return new UserModel(user[0]);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
+
   async findAllUsers(): Promise<UserModel[] | []> {
     const users = await this.executeQuery(
-      `SELECT ${this.formatFields(UserMapper.fields)} FROM ${this.dbName}`
+      `SELECT ${DBConnection.formatFields(UserMapper.fields)} FROM ${
+        UserMapper.dbName
+      }`
     );
     return users.map((user: IUser) => new UserModel(user));
   }
+
   async createUser(user: IUser): Promise<UserModel | null> {
     try {
       if (!user.metadata) {
@@ -61,20 +65,82 @@ export default class UserMapper extends DBConnection {
         user.metadata = JSON.stringify(user.metadata);
       }
 
-      const newUser = await this.executeQuery(
-        `INSERT INTO ${this.dbName} (${this.formatFields(
-          UserMapper.fields,
-          true
-        )}) VALUES ('${Object.values(user).join("','")}')`
-      );
+      const newUser = new UserModel(user);
+      newUser.setMetadataField("createdAt", new Date().toISOString());
 
-      if (!newUser) return null;
-
-      console.log("🚀 ~ UserMapper ~ createUser ~ newUser:", newUser);
+      await this.save(newUser);
 
       return newUser;
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
+  }
+
+  async updateUser(id: number, user: IUser): Promise<UserModel | null> {
+    try {
+      const existingUser = await this.findUserById(id);
+
+      if (!existingUser) return null;
+
+      if (user.firstName) existingUser.setFirstName(user.firstName);
+      if (user.lastName) existingUser.setLastName(user.lastName);
+      if (user.email) existingUser.setEmail(user.email);
+      if (user.password) existingUser.setPassword(user.password);
+      if (user.status) existingUser.setStatus(user.status);
+
+      existingUser.setMetadataField("updatedAt", new Date().toISOString());
+
+      await this.update(existingUser);
+
+      return existingUser;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async deleteUser(id: number): Promise<boolean> {
+    try {
+      await this.delete(id);
+
+      return true;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
+  }
+
+  async save(user: UserModel) {
+    const metadataString = JSON.stringify(user.getMetadata());
+
+    const query = `INSERT INTO ${
+      UserMapper.dbName
+    } (${DBConnection.formatFields(
+      UserMapper.fields,
+      true
+    )}) VALUES ('${user.getEmail()}', '${user.getFirstName()}', '${user.getLastName()}', '${user.getStatus()}', '${user.getPassword()}', '${metadataString}')`;
+
+    const { insertId } = await this.executeQuery(query);
+
+    user.setId(insertId);
+    this.disconnect();
+  }
+
+  async update(user: UserModel) {
+    const metadataString = JSON.stringify(user.getMetadata());
+
+    const query = `UPDATE ${
+      UserMapper.dbName
+    } SET firstName = '${user.getFirstName()}', lastName = '${user.getLastName()}', email = '${user.getEmail()}', password = '${user.getPassword()}', status = '${user.getStatus()}', metadata = '${metadataString}' WHERE id = ${user.getId()}`;
+
+    await this.executeQuery(query);
+    this.disconnect();
+  }
+
+  async delete(id: number) {
+    await this.executeQuery(
+      `DELETE FROM ${UserMapper.dbName} WHERE id = ${id}`
+    );
+
+    this.disconnect();
   }
 }

@@ -1,6 +1,7 @@
+import DBConnection from "../database/DBConnection";
 import { IUser, Status } from "../interfaces";
 
-export default class UserModel {
+export default class UserModel extends DBConnection {
   private id: number;
   private firstName: string;
   private lastName: string;
@@ -10,12 +11,14 @@ export default class UserModel {
   private metadata: string;
 
   constructor(user: any) {
+    super();
     this.id = user.id;
     this.firstName = user.firstName;
     this.lastName = user.lastName;
     this.email = user.email;
     this.password = user.password;
     this.status = user.status;
+    this.metadata = user.metadata;
   }
 
   getId(): number {
@@ -55,8 +58,12 @@ export default class UserModel {
     this.id = id;
   }
 
-  setName(firstName: string): void {
+  setFirstName(firstName: string): void {
     this.firstName = firstName;
+  }
+
+  setLastName(lastName: string): void {
+    this.lastName = lastName;
   }
 
   setEmail(email: string): void {
@@ -83,11 +90,11 @@ export default class UserModel {
       name: this.getFullName(),
       email: this.getEmail(),
       status: this.getStatus(),
+      metadata: this.getMetadata(),
     };
 
     if (includePrivateFields) {
       base.password = this.getPassword();
-      base.metadata = this.getMetadata();
     }
 
     return base;

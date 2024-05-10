@@ -4,6 +4,8 @@ export interface IUser {
   id?: number;
   status: Status;
   name: string;
+  firstName?: string;
+  lastName?: string;
   email: string;
   password?: string;
   metadata?: string;

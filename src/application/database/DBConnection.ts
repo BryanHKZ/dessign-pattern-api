@@ -1,5 +1,5 @@
-import MySQLConnection from "../database/MySQL";
 import { DatabaseConnection } from "../interfaces";
+import MySQLConnection from "./MySQL";
 
 export default class DBConnection {
   private databaseStrategy: DatabaseConnection;
@@ -20,7 +20,7 @@ export default class DBConnection {
     return this.databaseStrategy.executeQuery(query);
   }
 
-  formatFields(fields: string[], ignoreId = false) {
+  static formatFields(fields: string[], ignoreId = false) {
     if (ignoreId) {
       return fields.filter((field) => field !== "id").join(",");
     }
