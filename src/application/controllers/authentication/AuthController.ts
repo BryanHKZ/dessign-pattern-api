@@ -6,12 +6,17 @@ import OAuthAuthentication from "./methods/OAuth";
 export default class AuthController {
   constructor() {}
 
-  loginByOAuth = (req: Request, res: Response) => {
+  loginByOAuth = async (req: Request, res: Response) => {
     try {
-      // const { email, password } = req.body;
-      const mapper = new AuthMapper(new OAuthAuthentication());
+      const { email, password, authToken } = req.body;
+      const mapper = new AuthMapper(new OAuthAuthentication(authToken));
 
-      const responseToken = mapper.login("aaaa@gmail.com", "12345");
+      const responseToken = await mapper.login(email, password);
+
+      if (!responseToken) {
+        res.status(401).json({ error: "Credenciales inválidas" });
+        return;
+      }
 
       res.status(200).json({ token: responseToken });
     } catch (error) {
@@ -19,12 +24,17 @@ export default class AuthController {
     }
   };
 
-  loginByEmailAndPassword = (req: Request, res: Response) => {
+  loginByEmailAndPassword = async (req: Request, res: Response) => {
     try {
-      // const { email, password } = req.body;
+      const { email, password } = req.body;
       const mapper = new AuthMapper(new LoginAuthentication());
 
-      const responseToken = mapper.login("aaaa@gmail.com", "12345");
+      const responseToken = await mapper.login(email, password);
+
+      if (!responseToken) {
+        res.status(401).json({ error: "Credenciales inválidas" });
+        return;
+      }
 
       res.status(200).json({ token: responseToken });
     } catch (error) {

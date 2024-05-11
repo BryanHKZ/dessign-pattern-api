@@ -1,18 +1,15 @@
+import { signJwt } from "../../../../utils/index";
 import { AuthenticationStrategy } from "../../../interfaces";
+import UserModel from "../../../models/User";
 import LoginController from "../LoginController";
 
 export default class LoginAuthentication
   extends LoginController
   implements AuthenticationStrategy
 {
-  authenticate(email: string, password: string): boolean {
-    this.login(email, password);
-    return true;
-  }
-
-  validateAuthentication(email: string, password: string): boolean {
-    console.log("Validando inicio de sesión con método Auth Simple");
-    return true;
+  async authenticate(email: string, password: string): Promise<string> {
+    const token = await this.login(email, password);
+    return token;
   }
 
   saveToHistory(email: string): void {
@@ -21,10 +18,7 @@ export default class LoginAuthentication
     );
   }
 
-  createToken(email: string): string {
-    console.log(
-      `Token generado con método Auth Simple para el usuario: ${email}`
-    );
-    return "token";
+  createToken(user: UserModel): string {
+    return signJwt(user.toApi());
   }
 }

@@ -40,7 +40,7 @@ export interface ITask {
 }
 
 export interface AuthenticationStrategy {
-  authenticate(email: string, password: string): boolean;
+  authenticate(email: string, password: string): Promise<string>;
 }
 
 export interface DatabaseConnection {

@@ -169,8 +169,6 @@ export default class ProjectMapper extends DBConnection {
       true
     )} WHERE id = ?`;
 
-    console.log("🚀 ~ ProjectMapper ~ update ~ query:", project);
-
     await this.executeQuery(query, [
       project.getName(),
       project.getDate(),

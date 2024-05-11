@@ -16,7 +16,6 @@ export default class TaskModel {
   private metadata: string;
 
   constructor(task: any) {
-    console.log("🚀 ~ TaskModel ~ constructor ~ task:", task);
     this.id = task.id;
     this.name = task.name;
     this.description = task.description;

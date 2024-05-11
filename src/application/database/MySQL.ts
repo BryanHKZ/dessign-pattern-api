@@ -18,8 +18,6 @@ export default class MySQLConnection implements DatabaseConnection {
         password: process.env.MYSQL_DB_PASS,
         port: parseInt(process.env.MYSQL_DB_PORT),
       });
-
-      console.log("Connected to MySQL");
     } catch (error) {
       console.error(error);
     }
@@ -28,7 +26,6 @@ export default class MySQLConnection implements DatabaseConnection {
   disconnect() {
     setTimeout(() => {
       this.connection.end({ timeout: 3000 });
-      console.log("Disconnected from MySQL");
     }, 2000);
   }
 

@@ -1,12 +1,23 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Response } from "express";
+import jwt from "jsonwebtoken";
 
-export default function (req: Request, res: Response, next: NextFunction) {
+export default function (req: any, res: Response, next: NextFunction) {
   const token = req.headers["authorization"];
 
-  // Check if JWT is valid
+  if (!token) {
+    return res.status(403).json({ mensaje: "Token no proporcionado" });
+  }
 
-  // if (token !== process.env.AUTH_TOKEN)
-  //   res.status(401).json({ message: "Unauthorized." });
+  jwt.verify(
+    token.replace("Bearer ", ""),
+    process.env.SECRET_API_KEY,
+    (err: jwt.VerifyErrors, decoded: any) => {
+      if (err) {
+        return res.status(401).json({ mensaje: "Token inválido" });
+      }
 
-  next();
+      req.user = decoded;
+      next();
+    }
+  );
 }

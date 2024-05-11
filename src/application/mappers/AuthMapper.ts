@@ -1,10 +1,8 @@
 import DBConnection from "../database/DBConnection";
 import { AuthenticationStrategy } from "../interfaces";
-import UserMapper from "./UserMapper";
 
 export default class AuthMapper extends DBConnection {
   private authenticationStrategy: AuthenticationStrategy;
-  private dbName = "user";
 
   constructor(strategy: AuthenticationStrategy) {
     super();
@@ -13,14 +11,14 @@ export default class AuthMapper extends DBConnection {
 
   async login(email: string, password: string): Promise<string> {
     try {
-      const userMapper = new UserMapper();
-      const user = await userMapper.findUserByEmail(email);
+      const token = await this.authenticationStrategy.authenticate(
+        email,
+        password
+      );
 
-      if (!user) throw new Error("Usuario no encontrado");
-
-      return "";
+      return token;
     } catch (error) {
-      throw new Error("Ha ocurrido un error desconocido");
+      throw new Error(error.message);
     }
   }
 }

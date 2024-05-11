@@ -76,7 +76,6 @@ export default class TaskMapper extends DBConnection {
         parseInt(idProject),
         parseInt(idTask)
       );
-      console.log("🚀 ~ TaskMapper ~ deleteTask ~ existingTask:", existingTask);
 
       if (!existingTask) return null;
 
