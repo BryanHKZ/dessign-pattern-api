@@ -24,7 +24,7 @@ export interface IProject {
 export interface IProjectCategory {
   id: number;
   name: string;
-  project_id: string;
+  idProject: string;
   tasks?: ITask[];
 }
 

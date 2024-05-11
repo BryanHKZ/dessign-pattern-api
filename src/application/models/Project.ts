@@ -1,8 +1,9 @@
 import { IProjectCategory, ITask, Status } from "../interfaces";
-import ProjectMapper from "../mappers/ProjectMapper";
+import ProjectCategoryMapper from "../mappers/ProjectCategoryMapper";
 import TaskMapper from "../mappers/TaskMapper";
 import UserMapper from "../mappers/UserMapper";
 import UserModel from "./User";
+import Model_Utils from "./Utils";
 
 export default class ProjectModel {
   private id: number;
@@ -31,24 +32,25 @@ export default class ProjectModel {
     return this.name;
   }
 
-  getDate(): Date {
-    return this.toDate;
+  getDate(): string {
+    return Model_Utils.formatDate(this.toDate);
   }
 
   getStatus(): Status {
     return this.status;
   }
 
-  getCreatorId(): number {
-    return this.createdBy;
+  getCreatorId(): number | null {
+    return this.createdBy || null;
   }
 
-  getAssignedToId(): number {
-    return this.assignedTo;
+  getAssignedToId(): number | null {
+    return this.assignedTo || null;
   }
 
   async getCreator(): Promise<UserModel | null> {
-    const existUser = await new UserMapper().findUserById(this.createdBy);
+    if (!this.getCreatorId()) return null;
+    const existUser = await new UserMapper().findUserById(this.getCreatorId());
 
     if (!existUser) return null;
 
@@ -56,7 +58,11 @@ export default class ProjectModel {
   }
 
   async getAssignedTo(): Promise<UserModel | null> {
-    const existUser = await new UserMapper().findUserById(this.createdBy);
+    if (!this.getAssignedToId()) return null;
+
+    const existUser = await new UserMapper().findUserById(
+      this.getAssignedToId()
+    );
 
     if (!existUser) return null;
 
@@ -70,9 +76,10 @@ export default class ProjectModel {
 
   async getCategories(): Promise<IProjectCategory[]> {
     try {
-      const categories = await new ProjectMapper().findCategoriesByProjectId(
-        this.getId()
-      );
+      const categories =
+        await new ProjectCategoryMapper().findAllCategoriesByProjectId(
+          this.getId().toString()
+        );
 
       if (!categories.length) return [];
 
@@ -148,13 +155,18 @@ export default class ProjectModel {
   }
 
   async toApi(): Promise<any> {
+    let tasks = await this.getTasks();
+    const isAssigned = await this.getAssignedTo();
+    const hasCreator = await this.getCreator();
+
     const base = {
       id: this.getId(),
       name: this.getName(),
       toDate: this.getDate(),
       status: this.getStatus(),
-      createdBy: (await this.getCreator()).toApi(),
-      assignedTo: (await this.getAssignedTo()).toApi(),
+      createdBy: hasCreator ? hasCreator.toApi() : null,
+      assignedTo: isAssigned ? isAssigned.toApi() : null,
+      tasks,
       metadata: this.getMetadata(),
     };
 

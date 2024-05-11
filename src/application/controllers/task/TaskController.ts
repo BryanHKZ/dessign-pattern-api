@@ -7,57 +7,57 @@ export default class TaskController {
     this.taskMapper = new TaskMapper();
   }
 
-  async createTask(req: Request, res: Response) {
+  createTask = async (req: Request, res: Response) => {
     try {
       const task = await this.taskMapper.createTask(req.body);
-      res.status(201).send(task);
+      res.status(201).send(task.toApi());
     } catch (error) {
       console.error(error);
-      res.status(500).send("Internal Server Error");
+      res.status(500).json({ error: "Ha ocurrido un error" });
     }
-  }
+  };
 
-  async getTaskById(req: Request, res: Response) {
+  getTaskById = async (req: Request, res: Response) => {
     try {
       const task = await this.taskMapper.findTaskById(parseInt(req.params.id));
       if (!task) {
-        res.status(404).send("Task not found");
+        res.status(404).json({ error: "Tarea no encontrada" });
         return;
       }
-      res.status(200).send(task);
+      res.status(200).send(task.toApi());
     } catch (error) {
       console.error(error);
-      res.status(500).send("Internal Server Error");
+      res.status(500).json({ error: "Ha ocurrido un error" });
     }
-  }
+  };
 
-  async getTasks(req: Request, res: Response) {
+  getTasks = async (req: Request, res: Response) => {
     try {
       const tasks = await this.taskMapper.findAllTasks();
-      res.status(200).send(tasks);
+      res.status(200).send(tasks.map(async (task) => await task.toApi()));
     } catch (error) {
       console.error(error);
-      res.status(500).send("Internal Server Error");
+      res.status(500).json({ error: "Ha ocurrido un error" });
     }
-  }
+  };
 
-  async updateTask(req: Request, res: Response) {
+  updateTask = async (req: Request, res: Response) => {
     try {
       const task = await this.taskMapper.updateTask(req.body);
-      res.status(200).send(task);
+      res.status(200).send(task.toApi());
     } catch (error) {
       console.error(error);
-      res.status(500).send("Internal Server Error");
+      res.status(500).json({ error: "Ha ocurrido un error" });
     }
-  }
+  };
 
-  async deleteTask(req: Request, res: Response) {
+  deleteTask = async (req: Request, res: Response) => {
     try {
       await this.taskMapper.deleteTask(req.params.id);
       res.status(204).send();
     } catch (error) {
       console.error(error);
-      res.status(500).send("Internal Server Error");
+      res.status(500).json({ error: "Ha ocurrido un error" });
     }
-  }
+  };
 }

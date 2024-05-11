@@ -13,7 +13,7 @@ export default class UserController {
 
       res.status(200).json(users.map((user) => user.toApi()));
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: "Ha ocurrido un error" });
     }
   };
 
@@ -22,14 +22,11 @@ export default class UserController {
       const { id } = req.params;
       const user = await this.mapper.findUserById(parseInt(id));
 
-      if (!user) {
-        res.status(404).json({ error: "User not found" });
-        return;
-      }
+      if (!user) res.status(404).json({ error: "Usuario no encontrado" });
 
       res.status(200).json(user.toApi());
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: "Ha ocurrido un error" });
     }
   };
 
@@ -40,7 +37,7 @@ export default class UserController {
 
       res.status(201).json(newUser.toApi());
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: "Ha ocurrido un error" });
     }
   };
 
@@ -57,7 +54,7 @@ export default class UserController {
 
       res.status(200).json(updatedUser.toApi());
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: "Ha ocurrido un error" });
     }
   };
 
@@ -75,7 +72,7 @@ export default class UserController {
 
       res.status(200).json({ message: "User deleted" });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: "Ha ocurrido un error" });
     }
   };
 }

@@ -8,7 +8,7 @@ export default class TaskModel {
   private name: string;
   private description: string;
   private completed: "yes" | "no";
-  private idUser: number;
+  private assignedTo: number;
   private idCategory: number;
   private idProject: number;
   private metadata: string;
@@ -18,7 +18,7 @@ export default class TaskModel {
     this.name = task.name;
     this.description = task.description;
     this.completed = task.completed;
-    this.idUser = task.idUser;
+    this.assignedTo = task.assignedTo;
     this.idCategory = task.idCategory;
     this.idProject = task.idProject;
     this.metadata = task.metadata;
@@ -40,8 +40,8 @@ export default class TaskModel {
     return this.completed;
   }
 
-  getIdUser(): number {
-    return this.idUser;
+  getAssignedToId(): number {
+    return this.assignedTo;
   }
 
   getIdCategory(): number {
@@ -60,9 +60,11 @@ export default class TaskModel {
     try {
       const userMapper = new UserMapper();
 
-      const user = await userMapper.findUserById(this.idUser).then((user) => {
-        return user;
-      });
+      const user = await userMapper
+        .findUserById(this.assignedTo)
+        .then((user) => {
+          return user;
+        });
 
       return user;
     } catch (error) {
@@ -109,8 +111,8 @@ export default class TaskModel {
     this.completed = completed;
   }
 
-  setIdUser(idUser: number): void {
-    this.idUser = idUser;
+  setAssignedTo(assignedTo: number): void {
+    this.assignedTo = assignedTo;
   }
 
   setIdCategory(idCategory: number): void {

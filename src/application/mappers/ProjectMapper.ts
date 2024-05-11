@@ -2,6 +2,7 @@ import DBConnection from "../database/DBConnection";
 import { IProject, IProjectCategory } from "../interfaces";
 import ProjectModel from "../models/Project";
 import ProjectCategoryModel from "../models/ProjectCategoryModel";
+import Model_Utils from "../models/Utils";
 
 export default class ProjectMapper extends DBConnection {
   public static dbName = "project";
@@ -19,21 +20,31 @@ export default class ProjectMapper extends DBConnection {
     super();
   }
 
-  async createProject(project: IProject) {
+  async createProject(project: IProject): Promise<ProjectModel | null> {
     try {
+      if (project.toDate) project.toDate = new Date(project.toDate);
       const newProject = new ProjectModel(project);
+
+      newProject.setMetadataField(
+        "createdAt",
+        Model_Utils.formatDate(new Date())
+      );
 
       await this.save(newProject);
 
-      return newProject.toApi();
+      return newProject;
     } catch (error) {
       console.error(error);
+      throw new Error("Ha ocurrido un error creando el proyecto");
     }
   }
 
-  async updateProject(project: IProject) {
+  async updateProject(
+    id: string,
+    project: IProject
+  ): Promise<ProjectModel | null> {
     try {
-      const existingProject = await this.findProjectById(project.id);
+      const existingProject = await this.findProjectById(parseInt(id));
 
       if (!existingProject) return null;
 
@@ -43,25 +54,32 @@ export default class ProjectMapper extends DBConnection {
       if (project.createdBy) existingProject.setCreator(project.createdBy);
       if (project.assignedTo) existingProject.setAssignedTo(project.assignedTo);
 
+      existingProject.setMetadataField(
+        "updatedAt",
+        Model_Utils.formatDate(new Date())
+      );
+
       await this.update(existingProject);
 
-      return existingProject.toApi();
+      return existingProject;
     } catch (error) {
       console.error(error);
+      throw new Error("Ha ocurrido un error actualizando el proyecto");
     }
   }
 
-  async deleteProject(id: number) {
+  async deleteProject(id: string): Promise<boolean | null> {
     try {
-      const existingProject = await this.findProjectById(id);
+      const existingProject = await this.findProjectById(parseInt(id));
 
       if (!existingProject) return null;
 
-      await this.delete(id);
+      await this.delete(parseInt(id));
 
       return true;
     } catch (error) {
       console.error(error);
+      throw new Error("Ha ocurrido un error eliminando el proyecto");
     }
   }
 
@@ -71,24 +89,32 @@ export default class ProjectMapper extends DBConnection {
         `SELECT ${DBConnection.formatFields(ProjectMapper.fields)} FROM ${
           ProjectMapper.dbName
         } WHERE id = ?`,
-        [id.toString()]
+        [id]
       );
       if (!project.length) return null;
 
       return new ProjectModel(project[0]);
     } catch (error) {
       console.error(error);
+    } finally {
+      this.disconnect();
     }
   }
 
-  async findAllProjects(): Promise<ProjectModel[] | []> {
-    const projects = await this.executeQuery(
-      `SELECT ${DBConnection.formatFields(ProjectMapper.fields)} FROM ${
-        ProjectMapper.dbName
-      }`,
-      []
-    );
-    return projects.map((project: IProject) => new ProjectModel(project));
+  async findAllProjects(): Promise<ProjectModel[]> {
+    try {
+      const projects = await this.executeQuery(
+        `SELECT ${DBConnection.formatFields(ProjectMapper.fields)} FROM ${
+          ProjectMapper.dbName
+        } WHERE status = ?`,
+        ["active"]
+      );
+      return projects.map((project: IProject) => new ProjectModel(project));
+    } catch (error) {
+      console.error(error);
+    } finally {
+      this.disconnect();
+    }
   }
 
   async findCategoriesByProjectId(
@@ -98,7 +124,7 @@ export default class ProjectMapper extends DBConnection {
       const categories = await this.executeQuery(
         `SELECT ${DBConnection.formatFields(ProjectMapper.fields)} FROM ${
           ProjectMapper.dbName
-        } WHERE idProject = ?`,
+        } WHERE id = ?`,
         [idProject.toString()]
       );
       if (!categories.length) return [];
@@ -108,7 +134,8 @@ export default class ProjectMapper extends DBConnection {
       );
     } catch (error) {
       console.error(error);
-      return [];
+    } finally {
+      this.disconnect();
     }
   }
 
@@ -118,18 +145,20 @@ export default class ProjectMapper extends DBConnection {
     } (${DBConnection.formatFields(
       ProjectMapper.fields,
       true
-    )}) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+    )}) VALUES (?, ?, ?, ?, ?, ?)`;
 
     const { insertId } = await this.executeQuery(query, [
       project.getName(),
-      project.getDate().toISOString(),
+      project.getDate(),
       project.getStatus(),
-      project.getCreatorId().toString(),
-      project.getAssignedToId().toString(),
+      project.getCreatorId(),
+      project.getAssignedToId(),
       JSON.stringify(project.getMetadata()),
     ]);
 
     project.setId(insertId);
+
+    this.disconnect();
   }
 
   async update(project: ProjectModel) {
@@ -140,18 +169,22 @@ export default class ProjectMapper extends DBConnection {
 
     await this.executeQuery(query, [
       project.getName(),
-      project.getDate().toISOString(),
+      project.getDate(),
       project.getStatus(),
-      project.getCreatorId().toString(),
-      project.getAssignedToId().toString(),
+      project.getCreatorId(),
+      project.getAssignedToId(),
       JSON.stringify(project.getMetadata()),
-      project.getId().toString(),
+      project.getId(),
     ]);
+
+    this.disconnect();
   }
 
   async delete(id: number) {
     const query = `DELETE FROM ${ProjectMapper.dbName} WHERE id = ?`;
 
-    await this.executeQuery(query, [id.toString()]);
+    await this.executeQuery(query, [id]);
+
+    this.disconnect();
   }
 }

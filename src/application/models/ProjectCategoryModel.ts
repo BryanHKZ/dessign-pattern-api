@@ -49,7 +49,7 @@ export default class ProjectCategoryModel {
     const base: IProjectCategory = {
       id: this.getId(),
       name: this.getName(),
-      project_id: this.getIdProject(),
+      idProject: this.getIdProject(),
     };
 
     if (includeTasks) {

@@ -32,7 +32,7 @@ export default class MySQLConnection implements DatabaseConnection {
     }, 2000);
   }
 
-  async executeQuery(query: string, values: string[]) {
+  async executeQuery(query: string, values: any[]) {
     try {
       await this.connect();
 

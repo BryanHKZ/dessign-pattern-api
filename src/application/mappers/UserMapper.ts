@@ -1,6 +1,7 @@
 import DBConnection from "../database/DBConnection";
 import { IUser } from "../interfaces";
 import UserModel from "../models/User";
+import Model_Utils from "../models/Utils";
 
 export default class UserMapper extends DBConnection {
   public static dbName = "user";
@@ -31,6 +32,8 @@ export default class UserMapper extends DBConnection {
       return new UserModel(user[0]);
     } catch (error) {
       console.error(error);
+    } finally {
+      this.disconnect();
     }
   }
 
@@ -40,24 +43,32 @@ export default class UserMapper extends DBConnection {
         `SELECT ${DBConnection.formatFields(UserMapper.fields)} FROM ${
           UserMapper.dbName
         } WHERE id = ?`,
-        [id.toString()]
+        [id]
       );
       if (!user.length) return null;
 
       return new UserModel(user[0]);
     } catch (error) {
       console.error(error);
+    } finally {
+      this.disconnect();
     }
   }
 
   async findAllUsers(): Promise<UserModel[] | []> {
-    const users = await this.executeQuery(
-      `SELECT ${DBConnection.formatFields(UserMapper.fields)} FROM ${
-        UserMapper.dbName
-      }`,
-      []
-    );
-    return users.map((user: IUser) => new UserModel(user));
+    try {
+      const users = await this.executeQuery(
+        `SELECT ${DBConnection.formatFields(UserMapper.fields)} FROM ${
+          UserMapper.dbName
+        }`,
+        []
+      );
+      return users.map((user: IUser) => new UserModel(user));
+    } catch (error) {
+      console.error(error);
+    } finally {
+      this.disconnect();
+    }
   }
 
   async createUser(user: IUser): Promise<UserModel | null> {
@@ -69,7 +80,6 @@ export default class UserMapper extends DBConnection {
       }
 
       const newUser = new UserModel(user);
-      newUser.setMetadataField("createdAt", new Date().toISOString());
 
       await this.save(newUser);
 
@@ -91,7 +101,10 @@ export default class UserMapper extends DBConnection {
       if (user.password) existingUser.setPassword(user.password);
       if (user.status) existingUser.setStatus(user.status);
 
-      existingUser.setMetadataField("updatedAt", new Date().toISOString());
+      existingUser.setMetadataField(
+        "updatedAt",
+        Model_Utils.formatDate(new Date())
+      );
 
       await this.update(existingUser);
 
@@ -157,7 +170,7 @@ export default class UserMapper extends DBConnection {
 
   async delete(id: number) {
     await this.executeQuery(`DELETE FROM ${UserMapper.dbName} WHERE id = ?`, [
-      id.toString(),
+      id,
     ]);
 
     this.disconnect();

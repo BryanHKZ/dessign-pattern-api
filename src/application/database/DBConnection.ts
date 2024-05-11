@@ -16,7 +16,7 @@ export default class DBConnection {
     this.databaseStrategy.disconnect();
   }
 
-  public executeQuery(query: string, values: string[]) {
+  public executeQuery(query: string, values: any[]) {
     return this.databaseStrategy.executeQuery(query, values);
   }
 

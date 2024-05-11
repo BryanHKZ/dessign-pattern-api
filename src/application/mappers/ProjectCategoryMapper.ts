@@ -1,6 +1,7 @@
 import DBConnection from "../database/DBConnection";
 import { IProjectCategory } from "../interfaces";
 import ProjectCategoryModel from "../models/ProjectCategoryModel";
+import ProjectMapper from "./ProjectMapper";
 
 export default class ProjectCategoryMapper extends DBConnection {
   public static dbName = "projectcategory";
@@ -12,6 +13,12 @@ export default class ProjectCategoryMapper extends DBConnection {
 
   async createCategory(projectCategory: IProjectCategory) {
     try {
+      const existProject = await new ProjectMapper().findProjectById(
+        parseInt(projectCategory.idProject)
+      );
+
+      if (!existProject) return null;
+
       const newProjectCategory = new ProjectCategoryModel(projectCategory);
 
       await this.save(newProjectCategory);
@@ -22,18 +29,23 @@ export default class ProjectCategoryMapper extends DBConnection {
     }
   }
 
-  async updateCategory(projectCategory: IProjectCategory) {
+  async updateCategory(
+    projectId: string,
+    categoryId: string,
+    projectCategory: IProjectCategory
+  ) {
     try {
-      const existingProjectCategory = await this.findCategoryById(
-        projectCategory.id
+      const existingProjectCategory = await this.findCategoryInProject(
+        projectId,
+        categoryId
       );
 
       if (!existingProjectCategory) return null;
 
       if (projectCategory.name)
         existingProjectCategory.setName(projectCategory.name);
-      if (projectCategory.project_id)
-        existingProjectCategory.setIdProject(projectCategory.project_id);
+      if (projectCategory.idProject)
+        existingProjectCategory.setIdProject(projectCategory.idProject);
 
       await this.update(existingProjectCategory);
 
@@ -43,9 +55,12 @@ export default class ProjectCategoryMapper extends DBConnection {
     }
   }
 
-  async deleteCategory(id: number) {
+  async deleteCategory(idProject: string, idCategory: string) {
     try {
-      const existingProjectCategory = await this.findCategoryById(id);
+      const existingProjectCategory = await this.findCategoryInProject(
+        idProject,
+        idCategory
+      );
 
       if (!existingProjectCategory) return null;
 
@@ -67,42 +82,77 @@ export default class ProjectCategoryMapper extends DBConnection {
         `SELECT ${DBConnection.formatFields(
           ProjectCategoryMapper.fields
         )} FROM ${ProjectCategoryMapper.dbName} WHERE id = ?`,
-        [id.toString()]
+        [id]
       );
       if (!projectCategory.length) return null;
 
       return new ProjectCategoryModel(projectCategory[0]);
     } catch (error) {
       console.error(error);
+    } finally {
+      this.disconnect();
     }
   }
 
   async findAllCategories(): Promise<ProjectCategoryModel[]> {
-    const projectCategories = await this.executeQuery(
-      `SELECT ${DBConnection.formatFields(ProjectCategoryMapper.fields)} FROM ${
-        ProjectCategoryMapper.dbName
-      }`,
-      []
-    );
-    return projectCategories.map(
-      (projectCategory: IProjectCategory) =>
-        new ProjectCategoryModel(projectCategory)
-    );
+    try {
+      const projectCategories = await this.executeQuery(
+        `SELECT ${DBConnection.formatFields(
+          ProjectCategoryMapper.fields
+        )} FROM ${ProjectCategoryMapper.dbName}`,
+        []
+      );
+      return projectCategories.map(
+        (projectCategory: IProjectCategory) =>
+          new ProjectCategoryModel(projectCategory)
+      );
+    } catch (error) {
+      console.error(error);
+    } finally {
+      this.disconnect();
+    }
   }
 
   async findAllCategoriesByProjectId(
-    idProject: number
+    idProject: string
   ): Promise<ProjectCategoryModel[]> {
-    const projectCategories = await this.executeQuery(
-      `SELECT ${DBConnection.formatFields(ProjectCategoryMapper.fields)} FROM ${
-        ProjectCategoryMapper.dbName
-      } WHERE idProject = ?`,
-      [idProject.toString()]
-    );
-    return projectCategories.map(
-      (projectCategory: IProjectCategory) =>
-        new ProjectCategoryModel(projectCategory)
-    );
+    try {
+      const projectCategories = await this.executeQuery(
+        `SELECT ${DBConnection.formatFields(
+          ProjectCategoryMapper.fields
+        )} FROM ${ProjectCategoryMapper.dbName} WHERE idProject = ?`,
+        [idProject.toString()]
+      );
+      return projectCategories.map(
+        (projectCategory: IProjectCategory) =>
+          new ProjectCategoryModel(projectCategory)
+      );
+    } catch (error) {
+      console.error(error);
+    } finally {
+      this.disconnect();
+    }
+  }
+
+  async findCategoryInProject(
+    idProject: string,
+    id: string
+  ): Promise<ProjectCategoryModel | null> {
+    try {
+      const projectCategory = await this.executeQuery(
+        `SELECT ${DBConnection.formatFields(
+          ProjectCategoryMapper.fields
+        )} FROM ${ProjectCategoryMapper.dbName} WHERE idProject = ? AND id = ?`,
+        [idProject.toString(), id]
+      );
+      if (!projectCategory.length) return null;
+
+      return new ProjectCategoryModel(projectCategory[0]);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      this.disconnect();
+    }
   }
 
   async save(projectCategory: ProjectCategoryModel) {
@@ -117,6 +167,8 @@ export default class ProjectCategoryMapper extends DBConnection {
       projectCategory.getName(),
       projectCategory.getIdProject(),
     ]);
+
+    this.disconnect();
     return insertId;
   }
 
@@ -128,11 +180,15 @@ export default class ProjectCategoryMapper extends DBConnection {
       projectCategory.getIdProject(),
       projectCategory.getId().toString(),
     ]);
+
+    this.disconnect();
   }
 
   async delete(projectCategory: ProjectCategoryModel) {
     const query = `DELETE FROM ${ProjectCategoryMapper.dbName} WHERE id = ?`;
 
     await this.executeQuery(query, [projectCategory.getId().toString()]);
+
+    this.disconnect();
   }
 }
