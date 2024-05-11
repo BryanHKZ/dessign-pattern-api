@@ -87,7 +87,7 @@ export default class DBConnection {
     );
     const query = `DELETE FROM ${tableName} WHERE ${finalQueryFields}`;
 
-    console.log("🚀 ~ DBConnection ~ generateDeleteQuery ~ query:", query);
+    console.log("🚀 ~ DBConnection ~ query:", query);
     return query;
   }
 
