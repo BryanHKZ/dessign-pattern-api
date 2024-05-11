@@ -63,7 +63,7 @@ export default class TaskModel {
       const userMapper = new UserMapper();
 
       const user = await userMapper
-        .findUserById(this.assignedTo)
+        .findUserById(this.getAssignedToId())
         .then((user) => {
           return user;
         });

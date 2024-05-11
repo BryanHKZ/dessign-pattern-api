@@ -47,7 +47,7 @@ export default class ProjectCategoryMapper extends DBConnection {
       if (projectCategory.idProject)
         existingProjectCategory.setIdProject(projectCategory.idProject);
 
-      await this.update(existingProjectCategory);
+      await this.update(existingProjectCategory, projectId);
 
       return existingProjectCategory;
     } catch (error) {
@@ -79,9 +79,11 @@ export default class ProjectCategoryMapper extends DBConnection {
   async findCategoryById(id: number): Promise<ProjectCategoryModel | null> {
     try {
       const projectCategory = await this.executeQuery(
-        `SELECT ${DBConnection.formatFields(
-          ProjectCategoryMapper.fields
-        )} FROM ${ProjectCategoryMapper.dbName} WHERE id = ?`,
+        DBConnection.generateSelectQuery(
+          ProjectCategoryMapper.dbName,
+          ProjectCategoryMapper.fields,
+          ["id"]
+        ),
         [id]
       );
       if (!projectCategory.length) return null;
@@ -97,9 +99,11 @@ export default class ProjectCategoryMapper extends DBConnection {
   async findAllCategories(): Promise<ProjectCategoryModel[]> {
     try {
       const projectCategories = await this.executeQuery(
-        `SELECT ${DBConnection.formatFields(
-          ProjectCategoryMapper.fields
-        )} FROM ${ProjectCategoryMapper.dbName}`,
+        DBConnection.generateSelectQuery(
+          ProjectCategoryMapper.dbName,
+          ProjectCategoryMapper.fields,
+          []
+        ),
         []
       );
       return projectCategories.map(
@@ -118,10 +122,12 @@ export default class ProjectCategoryMapper extends DBConnection {
   ): Promise<ProjectCategoryModel[]> {
     try {
       const projectCategories = await this.executeQuery(
-        `SELECT ${DBConnection.formatFields(
-          ProjectCategoryMapper.fields
-        )} FROM ${ProjectCategoryMapper.dbName} WHERE idProject = ?`,
-        [idProject.toString()]
+        DBConnection.generateSelectQuery(
+          ProjectCategoryMapper.dbName,
+          ProjectCategoryMapper.fields,
+          ["idProject"]
+        ),
+        [idProject]
       );
       return projectCategories.map(
         (projectCategory: IProjectCategory) =>
@@ -140,10 +146,12 @@ export default class ProjectCategoryMapper extends DBConnection {
   ): Promise<ProjectCategoryModel | null> {
     try {
       const projectCategory = await this.executeQuery(
-        `SELECT ${DBConnection.formatFields(
-          ProjectCategoryMapper.fields
-        )} FROM ${ProjectCategoryMapper.dbName} WHERE idProject = ? AND id = ?`,
-        [idProject.toString(), id]
+        DBConnection.generateSelectQuery(
+          ProjectCategoryMapper.dbName,
+          ProjectCategoryMapper.fields,
+          ["idProject", "id"]
+        ),
+        [idProject, id]
       );
       if (!projectCategory.length) return null;
 
@@ -156,12 +164,11 @@ export default class ProjectCategoryMapper extends DBConnection {
   }
 
   async save(projectCategory: ProjectCategoryModel) {
-    const query = `INSERT INTO ${
-      ProjectCategoryMapper.dbName
-    } (${DBConnection.formatFields(
+    const query = DBConnection.generateInsertQuery(
+      ProjectCategoryMapper.dbName,
       ProjectCategoryMapper.fields,
       true
-    )}) VALUES (?, ?)`;
+    );
 
     const { insertId } = await this.executeQuery(query, [
       projectCategory.getName(),
@@ -172,22 +179,34 @@ export default class ProjectCategoryMapper extends DBConnection {
     return insertId;
   }
 
-  async update(projectCategory: ProjectCategoryModel) {
-    const query = `UPDATE ${ProjectCategoryMapper.dbName} SET name = ?, idProject = ? WHERE id = ?`;
+  async update(projectCategory: ProjectCategoryModel, oldId: string) {
+    const query = DBConnection.generateUpdateQuery(
+      ProjectCategoryMapper.dbName,
+      ProjectCategoryMapper.fields,
+      true,
+      ["id", "idProject"]
+    );
 
     await this.executeQuery(query, [
       projectCategory.getName(),
       projectCategory.getIdProject(),
-      projectCategory.getId().toString(),
+      projectCategory.getId(),
+      oldId,
     ]);
 
     this.disconnect();
   }
 
   async delete(projectCategory: ProjectCategoryModel) {
-    const query = `DELETE FROM ${ProjectCategoryMapper.dbName} WHERE id = ?`;
+    const query = DBConnection.generateDeleteQuery(
+      ProjectCategoryMapper.dbName,
+      ["id", "idProject"]
+    );
 
-    await this.executeQuery(query, [projectCategory.getId().toString()]);
+    await this.executeQuery(query, [
+      projectCategory.getId(),
+      projectCategory.getIdProject(),
+    ]);
 
     this.disconnect();
   }

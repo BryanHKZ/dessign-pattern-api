@@ -127,7 +127,7 @@ export default class ProjectMapper extends DBConnection {
         `SELECT ${DBConnection.formatFields(ProjectMapper.fields)} FROM ${
           ProjectMapper.dbName
         } WHERE id = ?`,
-        [idProject.toString()]
+        [idProject]
       );
       if (!categories.length) return [];
 
@@ -142,12 +142,11 @@ export default class ProjectMapper extends DBConnection {
   }
 
   async save(project: ProjectModel) {
-    const query = `INSERT INTO ${
-      ProjectMapper.dbName
-    } (${DBConnection.formatFields(
+    const query = DBConnection.generateInsertQuery(
+      ProjectMapper.dbName,
       ProjectMapper.fields,
       true
-    )}) VALUES (?, ?, ?, ?, ?, ?)`;
+    );
 
     const { insertId } = await this.executeQuery(query, [
       project.getName(),
@@ -164,10 +163,11 @@ export default class ProjectMapper extends DBConnection {
   }
 
   async update(project: ProjectModel) {
-    const query = `UPDATE ${ProjectMapper.dbName} SET ${DBConnection.mapFields(
+    const query = DBConnection.generateUpdateQuery(
+      ProjectMapper.dbName,
       ProjectMapper.fields,
       true
-    )} WHERE id = ?`;
+    );
 
     await this.executeQuery(query, [
       project.getName(),
@@ -183,7 +183,9 @@ export default class ProjectMapper extends DBConnection {
   }
 
   async delete(id: number) {
-    const query = `DELETE FROM ${ProjectMapper.dbName} WHERE id = ?`;
+    const query = DBConnection.generateDeleteQuery(ProjectMapper.dbName, [
+      "id",
+    ]);
 
     await this.executeQuery(query, [id]);
 

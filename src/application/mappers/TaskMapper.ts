@@ -62,7 +62,7 @@ export default class TaskMapper extends DBConnection {
         Model_Utils.formatDate(new Date())
       );
 
-      await this.update(existingTask);
+      await this.update(projectId, existingTask);
 
       return existingTask;
     } catch (error) {
@@ -79,7 +79,7 @@ export default class TaskMapper extends DBConnection {
 
       if (!existingTask) return null;
 
-      await this.delete(existingTask.getId());
+      await this.delete(existingTask);
 
       return existingTask;
     } catch (error) {
@@ -90,9 +90,9 @@ export default class TaskMapper extends DBConnection {
   async findTaskById(id: number): Promise<TaskModel | null> {
     try {
       const task = await this.executeQuery(
-        `SELECT ${DBConnection.formatFields(TaskMapper.fields)} FROM ${
-          TaskMapper.dbName
-        } WHERE id = ?`,
+        DBConnection.generateSelectQuery(TaskMapper.dbName, TaskMapper.fields, [
+          "id",
+        ]),
         [id]
       );
       if (!task.length) return null;
@@ -108,9 +108,11 @@ export default class TaskMapper extends DBConnection {
   async findAllTasks(): Promise<TaskModel[] | []> {
     try {
       const tasks = await this.executeQuery(
-        `SELECT ${DBConnection.formatFields(TaskMapper.fields)} FROM ${
-          TaskMapper.dbName
-        }`,
+        DBConnection.generateSelectQuery(
+          TaskMapper.dbName,
+          TaskMapper.fields,
+          []
+        ),
         []
       );
       return tasks.map((task: ITask) => new TaskModel(task));
@@ -127,9 +129,10 @@ export default class TaskMapper extends DBConnection {
   ): Promise<TaskModel | null> {
     try {
       const task = await this.executeQuery(
-        `SELECT ${DBConnection.formatFields(TaskMapper.fields)} FROM ${
-          TaskMapper.dbName
-        } WHERE id = ? AND idProject = ?`,
+        DBConnection.generateSelectQuery(TaskMapper.dbName, TaskMapper.fields, [
+          "id",
+          "idProject",
+        ]),
         [idTask, idProject]
       );
       if (!task.length) return null;
@@ -145,10 +148,10 @@ export default class TaskMapper extends DBConnection {
   async findAllTasksByProjectId(idProject: number): Promise<TaskModel[] | []> {
     try {
       const tasks = await this.executeQuery(
-        `SELECT ${DBConnection.formatFields(TaskMapper.fields)} FROM ${
-          TaskMapper.dbName
-        } WHERE idProject = ?`,
-        [idProject.toString()]
+        DBConnection.generateSelectQuery(TaskMapper.dbName, TaskMapper.fields, [
+          "idProject",
+        ]),
+        [idProject]
       );
       return tasks.map((task: ITask) => new TaskModel(task));
     } catch (error) {
@@ -161,8 +164,10 @@ export default class TaskMapper extends DBConnection {
   async getTasksByCategory(idCategory: number) {
     try {
       const tasks = await this.executeQuery(
-        `SELECT * FROM task WHERE idCategory = ?`,
-        [idCategory.toString()]
+        DBConnection.generateSelectQuery(TaskMapper.dbName, TaskMapper.fields, [
+          "idCategory",
+        ]),
+        [idCategory]
       );
 
       if (!tasks.length) return [];
@@ -178,12 +183,11 @@ export default class TaskMapper extends DBConnection {
   async save(task: TaskModel) {
     const metadataString = JSON.stringify(task.getMetadata());
 
-    const query = `INSERT INTO ${
-      TaskMapper.dbName
-    } (${DBConnection.formatFields(
+    const query = DBConnection.generateInsertQuery(
+      TaskMapper.dbName,
       TaskMapper.fields,
       true
-    )}) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+    );
 
     const { insertId } = await this.executeQuery(query, [
       task.getName(),
@@ -199,13 +203,15 @@ export default class TaskMapper extends DBConnection {
     this.disconnect();
   }
 
-  async update(task: TaskModel) {
+  async update(oldIdProject: string, task: TaskModel) {
     try {
       await this.executeQuery(
-        `UPDATE ${TaskMapper.dbName} SET ${DBConnection.mapFields(
+        DBConnection.generateUpdateQuery(
+          TaskMapper.dbName,
           TaskMapper.fields,
-          true
-        )} WHERE id = ?`,
+          true,
+          ["idProject", "id"]
+        ),
         [
           task.getName(),
           task.getDescription(),
@@ -214,6 +220,7 @@ export default class TaskMapper extends DBConnection {
           task.getIdProject(),
           task.getIdCategory(),
           JSON.stringify(task.getMetadata()),
+          oldIdProject,
           task.getId(),
         ]
       );
@@ -226,11 +233,15 @@ export default class TaskMapper extends DBConnection {
     }
   }
 
-  async delete(id: number): Promise<void> {
+  async delete(task: TaskModel): Promise<void> {
     try {
-      await this.executeQuery(`DELETE FROM ${TaskMapper.dbName} WHERE id = ?`, [
-        id,
-      ]);
+      await this.executeQuery(
+        DBConnection.generateDeleteQuery(TaskMapper.dbName, [
+          "id",
+          "idProject",
+        ]),
+        [task.getId(), task.getIdProject()]
+      );
     } catch (error) {
       console.error(error);
     } finally {

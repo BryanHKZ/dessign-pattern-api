@@ -39,7 +39,13 @@ export default class TaskController {
       const tasks = await this.taskMapper.findAllTasksByProjectId(
         parseInt(req.params.projectId)
       );
-      res.status(200).send(tasks.map(async (task) => await task.toApi()));
+      let results = [];
+
+      for await (const task of tasks) {
+        results.push(await task.toApi());
+      }
+
+      res.status(200).json(results);
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: "Ha ocurrido un error" });

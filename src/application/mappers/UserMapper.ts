@@ -22,9 +22,9 @@ export default class UserMapper extends DBConnection {
   async findUserByEmail(email: string): Promise<UserModel | null> {
     try {
       const user = await this.executeQuery(
-        `SELECT ${DBConnection.formatFields(UserMapper.fields)} FROM ${
-          UserMapper.dbName
-        } WHERE email = ?`,
+        DBConnection.generateSelectQuery(UserMapper.dbName, UserMapper.fields, [
+          "email",
+        ]),
         [email]
       );
       if (!user.length) return null;
@@ -40,9 +40,9 @@ export default class UserMapper extends DBConnection {
   async findUserById(id?: number): Promise<UserModel | null> {
     try {
       const user = await this.executeQuery(
-        `SELECT ${DBConnection.formatFields(UserMapper.fields)} FROM ${
-          UserMapper.dbName
-        } WHERE id = ?`,
+        DBConnection.generateSelectQuery(UserMapper.dbName, UserMapper.fields, [
+          "id",
+        ]),
         [id]
       );
       if (!user.length) return null;
@@ -58,9 +58,11 @@ export default class UserMapper extends DBConnection {
   async findAllUsers(): Promise<UserModel[] | []> {
     try {
       const users = await this.executeQuery(
-        `SELECT ${DBConnection.formatFields(UserMapper.fields)} FROM ${
-          UserMapper.dbName
-        }`,
+        DBConnection.generateSelectQuery(
+          UserMapper.dbName,
+          UserMapper.fields,
+          []
+        ),
         []
       );
       return users.map((user: IUser) => new UserModel(user));
@@ -128,12 +130,11 @@ export default class UserMapper extends DBConnection {
   async save(user: UserModel) {
     const metadataString = JSON.stringify(user.getMetadata());
 
-    const query = `INSERT INTO ${
-      UserMapper.dbName
-    } (${DBConnection.formatFields(
+    const query = DBConnection.generateInsertQuery(
+      UserMapper.dbName,
       UserMapper.fields,
       true
-    )}) VALUES (?, ?, ?, ?, ?, ?)`;
+    );
 
     const { insertId } = await this.executeQuery(query, [
       user.getEmail(),
@@ -151,10 +152,12 @@ export default class UserMapper extends DBConnection {
   async update(user: UserModel) {
     const metadataString = JSON.stringify(user.getMetadata());
 
-    const query = `UPDATE ${UserMapper.dbName} SET ${DBConnection.mapFields(
+    const query = DBConnection.generateUpdateQuery(
+      UserMapper.dbName,
       UserMapper.fields,
-      true
-    )} WHERE id = ?`;
+      true,
+      ["id"]
+    );
 
     await this.executeQuery(query, [
       user.getEmail(),
@@ -163,15 +166,16 @@ export default class UserMapper extends DBConnection {
       user.getStatus(),
       user.getPassword(),
       metadataString,
-      user.getId().toString(),
+      user.getId(),
     ]);
     this.disconnect();
   }
 
   async delete(id: number) {
-    await this.executeQuery(`DELETE FROM ${UserMapper.dbName} WHERE id = ?`, [
-      id,
-    ]);
+    await this.executeQuery(
+      DBConnection.generateDeleteQuery(UserMapper.dbName, ["id"]),
+      [id]
+    );
 
     this.disconnect();
   }
