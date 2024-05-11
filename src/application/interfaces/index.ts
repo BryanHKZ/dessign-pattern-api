@@ -34,8 +34,8 @@ export interface ITask {
   description: string;
   completed: boolean;
   assignedTo?: number;
-  category?: number;
-  project?: number;
+  idCategory?: number;
+  idProject?: number;
   metadata?: string;
 }
 

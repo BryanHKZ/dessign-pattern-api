@@ -51,8 +51,10 @@ export default class ProjectMapper extends DBConnection {
       if (project.name) existingProject.setName(project.name);
       if (project.toDate) existingProject.setDate(project.toDate);
       if (project.status) existingProject.setStatus(project.status);
-      if (project.createdBy) existingProject.setCreator(project.createdBy);
-      if (project.assignedTo) existingProject.setAssignedTo(project.assignedTo);
+      if (project.createdBy)
+        await existingProject.setCreator(project.createdBy);
+      if (project.assignedTo)
+        await existingProject.setAssignedTo(project.assignedTo);
 
       existingProject.setMetadataField(
         "updatedAt",
@@ -166,6 +168,8 @@ export default class ProjectMapper extends DBConnection {
       ProjectMapper.fields,
       true
     )} WHERE id = ?`;
+
+    console.log("🚀 ~ ProjectMapper ~ update ~ query:", project);
 
     await this.executeQuery(query, [
       project.getName(),

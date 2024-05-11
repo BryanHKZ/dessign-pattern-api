@@ -154,21 +154,24 @@ export default class ProjectModel {
     this.metadata = JSON.stringify(metadata);
   }
 
-  async toApi(): Promise<any> {
-    let tasks = await this.getTasks();
-    const isAssigned = await this.getAssignedTo();
-    const hasCreator = await this.getCreator();
-
-    const base = {
+  async toApi(simple = false): Promise<any> {
+    const base: any = {
       id: this.getId(),
       name: this.getName(),
       toDate: this.getDate(),
       status: this.getStatus(),
-      createdBy: hasCreator ? hasCreator.toApi() : null,
-      assignedTo: isAssigned ? isAssigned.toApi() : null,
-      tasks,
-      metadata: this.getMetadata(),
     };
+
+    if (!simple) {
+      let tasks = await this.getTasks();
+      const isAssigned = await this.getAssignedTo();
+      const hasCreator = await this.getCreator();
+
+      base.createdBy = hasCreator ? await hasCreator.toApi() : null;
+      base.assignedTo = isAssigned ? await isAssigned.toApi() : null;
+      base.categories = await this.getCategories();
+      base.tasks = tasks;
+    }
 
     return base;
   }

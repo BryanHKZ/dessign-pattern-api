@@ -29,9 +29,10 @@ export default class DBConnection {
   }
 
   static formatFields(fields: string[], ignoreId = false) {
+    let finalFields = fields;
     if (ignoreId) {
-      return fields.filter((field) => field !== "id").join(",");
+      finalFields = fields.filter((field) => field !== "id");
     }
-    return fields.join(",");
+    return finalFields.join(",");
   }
 }

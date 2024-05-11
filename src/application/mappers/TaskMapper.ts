@@ -1,6 +1,7 @@
 import DBConnection from "../database/DBConnection";
 import { ITask } from "../interfaces";
 import TaskModel from "../models/Task";
+import Model_Utils from "../models/Utils";
 import ProjectMapper from "./ProjectMapper";
 
 export default class TaskMapper extends DBConnection {
@@ -23,11 +24,13 @@ export default class TaskMapper extends DBConnection {
   async createTask(task: ITask) {
     try {
       const existProject = await new ProjectMapper().findProjectById(
-        task.project
+        task.idProject
       );
 
       if (!existProject) throw new Error("Project not found");
       const newTask = new TaskModel(task);
+
+      newTask.setMetadataField("createdAt", Model_Utils.formatDate(new Date()));
 
       await this.save(newTask);
 
@@ -37,9 +40,12 @@ export default class TaskMapper extends DBConnection {
     }
   }
 
-  async updateTask(task: ITask) {
+  async updateTask(projectId: string, taskId: string, task: ITask) {
     try {
-      const existingTask = await this.findTaskById(task.id);
+      const existingTask = await this.findTaskByIdAndProjectId(
+        parseInt(projectId),
+        parseInt(taskId)
+      );
 
       if (!existingTask) return null;
 
@@ -48,7 +54,13 @@ export default class TaskMapper extends DBConnection {
       if (task.completed)
         existingTask.setCompleted(task.completed ? "yes" : "no");
       if (task.assignedTo) existingTask.setAssignedTo(task.assignedTo);
-      if (task.category) existingTask.setIdCategory(task.category);
+      if (task.idCategory) existingTask.setIdCategory(task.idCategory);
+      if (task.idProject) existingTask.setIdProject(task.idProject);
+
+      existingTask.setMetadataField(
+        "updatedAt",
+        Model_Utils.formatDate(new Date())
+      );
 
       await this.update(existingTask);
 
@@ -58,9 +70,13 @@ export default class TaskMapper extends DBConnection {
     }
   }
 
-  async deleteTask(id: string) {
+  async deleteTask(idProject: string, idTask: string) {
     try {
-      const existingTask = await this.findTaskById(parseInt(id));
+      const existingTask = await this.findTaskByIdAndProjectId(
+        parseInt(idProject),
+        parseInt(idTask)
+      );
+      console.log("🚀 ~ TaskMapper ~ deleteTask ~ existingTask:", existingTask);
 
       if (!existingTask) return null;
 
@@ -99,6 +115,27 @@ export default class TaskMapper extends DBConnection {
         []
       );
       return tasks.map((task: ITask) => new TaskModel(task));
+    } catch (error) {
+      console.error(error);
+    } finally {
+      this.disconnect();
+    }
+  }
+
+  async findTaskByIdAndProjectId(
+    idProject: number,
+    idTask: number
+  ): Promise<TaskModel | null> {
+    try {
+      const task = await this.executeQuery(
+        `SELECT ${DBConnection.formatFields(TaskMapper.fields)} FROM ${
+          TaskMapper.dbName
+        } WHERE id = ? AND idProject = ?`,
+        [idTask, idProject]
+      );
+      if (!task.length) return null;
+
+      return new TaskModel(task[0]);
     } catch (error) {
       console.error(error);
     } finally {
@@ -147,14 +184,15 @@ export default class TaskMapper extends DBConnection {
     } (${DBConnection.formatFields(
       TaskMapper.fields,
       true
-    )}) VALUES (?, ?, ?, ?, ?, ?)`;
+    )}) VALUES (?, ?, ?, ?, ?, ?, ?)`;
 
     const { insertId } = await this.executeQuery(query, [
       task.getName(),
       task.getDescription(),
       task.getCompleted(),
-      task.getAssignedTo().toString(),
-      task.getIdCategory().toString(),
+      task.getAssignedToId(),
+      task.getIdProject(),
+      task.getIdCategory(),
       metadataString,
     ]);
 
@@ -168,17 +206,20 @@ export default class TaskMapper extends DBConnection {
         `UPDATE ${TaskMapper.dbName} SET ${DBConnection.mapFields(
           TaskMapper.fields,
           true
-        )},  WHERE id = ?`,
+        )} WHERE id = ?`,
         [
           task.getName(),
           task.getDescription(),
           task.getCompleted(),
-          task.getAssignedTo().toString(),
-          task.getIdCategory().toString(),
+          task.getAssignedToId(),
+          task.getIdProject(),
+          task.getIdCategory(),
           JSON.stringify(task.getMetadata()),
-          task.getId().toString(),
+          task.getId(),
         ]
       );
+
+      this.disconnect();
     } catch (error) {
       console.error(error);
     } finally {

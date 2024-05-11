@@ -1,3 +1,5 @@
+import ProjectCategoryMapper from "../mappers/ProjectCategoryMapper";
+import ProjectMapper from "../mappers/ProjectMapper";
 import UserMapper from "../mappers/UserMapper";
 import ProjectModel from "./Project";
 import ProjectCategoryModel from "./ProjectCategoryModel";
@@ -14,6 +16,7 @@ export default class TaskModel {
   private metadata: string;
 
   constructor(task: any) {
+    console.log("🚀 ~ TaskModel ~ constructor ~ task:", task);
     this.id = task.id;
     this.name = task.name;
     this.description = task.description;
@@ -40,16 +43,16 @@ export default class TaskModel {
     return this.completed;
   }
 
-  getAssignedToId(): number {
-    return this.assignedTo;
+  getAssignedToId(): number | null {
+    return this.assignedTo || null;
   }
 
-  getIdCategory(): number {
-    return this.idCategory;
+  getIdCategory(): number | null {
+    return this.idCategory || null;
   }
 
-  getIdProject(): number {
-    return this.idProject;
+  getIdProject(): number | null {
+    return this.idProject || null;
   }
 
   isCompleted(): boolean {
@@ -74,8 +77,11 @@ export default class TaskModel {
 
   async getCategory(): Promise<ProjectCategoryModel | null> {
     try {
-      //DO REQUEST TO DATABASE TO GET CATEGORY
-      return null;
+      const mapper = new ProjectCategoryMapper();
+
+      const category = await mapper.findCategoryById(this.getIdCategory());
+
+      return category;
     } catch (error) {
       return null;
     }
@@ -83,8 +89,10 @@ export default class TaskModel {
 
   async getProject(): Promise<ProjectModel | null> {
     try {
-      //DO REQUEST TO DATABASE TO GET PROJECT
-      return null;
+      const mapper = new ProjectMapper();
+      const project = await mapper.findProjectById(this.getIdProject());
+
+      return project;
     } catch (error) {
       return null;
     }
@@ -141,7 +149,7 @@ export default class TaskModel {
       completed: this.isCompleted(),
       assignedTo: assignedTo ? assignedTo.toApi() : null,
       category: category ? await category.toApi() : null,
-      project: project ? project.toApi() : null,
+      project: project ? await project.toApi(true) : null,
       metadata: this.getMetadata(),
     };
 

@@ -12,7 +12,7 @@ export default class CategoryController {
 
       if (!category)
         return res.status(404).json({ error: "Proyecto no encontrado" });
-      res.status(204);
+      res.status(204).json(await category.toApi());
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: "Ha ocurrido un error" });
